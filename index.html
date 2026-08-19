@@ -3,281 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ToRo Voice</title>
-    <link href="https://googleapis.com" rel="stylesheet">
+    <title>AI ToRØ App</title>
     <style>
         body {
-            background: #000000;
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
             margin: 0;
-            padding: 15px;
-            font-family: 'Open Sans', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            box-sizing: border-box;
-        }
-        .wrapper {
-            background-color: #111111;
-            color: #ececec;
-            padding: 25px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            border: 2px solid #ff3333;
-            box-shadow: 0 10px 40px rgba(255, 51, 51, 0.15);
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            height: 520px;
-            justify-content: space-between;
             align-items: center;
-            box-sizing: border-box;
         }
-        .header {
+        .container {
+            max-width: 600px;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 12px;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
-        .brand {
-            font-weight: 700;
-            font-size: 22px;
-            letter-spacing: 1px;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-        }
-        .horns {
-            position: relative;
-            display: inline-block;
-        }
-        .horns::before, .horns::after {
-            content: "";
-            position: absolute;
-            top: -5px;
-            width: 4px;
-            height: 7px;
-            background: #ff3333;
-            border-radius: 2px;
-        }
-        .horns::before { left: 1px; transform: rotate(-25deg); }
-        .horns::after { right: 2px; transform: rotate(25deg); }
-        
-        .toro-avatar {
-            font-size: 60px;
-            margin-top: 10px;
-            animation: bounce 2s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        
-        .question-text {
-            font-size: 16px;
-            font-weight: 700;
+        h1, h2 {
+            color: #ffcc00;
             text-align: center;
-            color: #ffffff;
-            line-height: 1.4;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
-        
-        .input-box {
-            width: 100%;
-            background: #222222;
-            border: 1px solid #444444;
-            border-radius: 16px;
-            padding: 14px;
-            color: white;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 15px;
-            outline: none;
-            text-align: center;
-            box-sizing: border-box;
-        }
-        
-        .next-btn {
-            background: #ff3333;
-            color: white;
-            border: none;
-            border-radius: 16px;
-            padding: 14px;
-            width: 100%;
-            font-weight: 700;
-            font-size: 15px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .voice-section {
-            display: none;
-            width: 100%;
-            height: 100%;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .voice-btn {
-            background: #ff3333;
-            border: none;
-            color: white;
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255, 51, 51, 0.4);
-        }
-        .voice-btn.listening {
-            background: #22c55e;
-            box-shadow: 0 0 30px rgba(34, 197, 94, 0.6);
-        }
-        .transcript-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
+        button {
             width: 100%;
             padding: 12px;
-            font-size: 14px;
-            height: 80px;
-            overflow-y: auto;
-            color: #b4b4b4;
-            text-align: center;
-            font-style: italic;
+            background-color: #ffcc00;
+            color: #121212;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #e6b800;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #2a2a2a;
+            color: #ffffff;
+            border: 1px solid #444;
+            border-radius: 4px;
             box-sizing: border-box;
+        }
+        .chat-box {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .msg {
+            margin-bottom: 8px;
+            padding: 6px;
+            border-radius: 4px;
+            background-color: #2d2d2d;
+        }
+        .vip {
+            border-left: 4px solid #ffcc00;
         }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="header">
-        <div class="brand">AI ToR<span class="horns">o</span></div>
+    <div class="container">
+        <h1>AI ToRØ Premium</h1>
+        <p style="text-align: center;">Accedi ai Rank d Elite e sblocca il Badge Hardcore per 3,99€ al mese.</p>
+        <button id="checkout-btn">Abbonati Ora - 3,99€</button>
+        <p id="payment-status" style="text-align: center; color: #ffcc00;"></p>
     </div>
-    
-    <div id="tutorial-section" style="display: flex; flex-direction: column; width:100%; justify-content: space-between; flex: 1; align-items: center;">
-        <div class="toro-avatar">🐂</div>
-        <div id="question" class="question-text">Benvenuto guerriero. Iniziamo il setup. Come vuoi chiamarti?</div>
-        <input type="text" id="setup-input" class="input-box" placeholder="Scrivi qui..." autocomplete="off">
-        <button id="next-btn" class="next-btn">Invia</button>
+
+    <div class="container">
+        <h2>Community Chat</h2>
+        <div class="chat-box" id="chat-box"></div>
+        <input type="text" id="username-input" placeholder="Il tuo Username">
+        <textarea id="message-input" placeholder="Scrivi un messaggio..."></textarea>
+        <button id="send-btn">Invia Messaggio</button>
     </div>
-    
-    <div id="voice-section" class="voice-section">
-        <div id="status" style="font-size:16px; color:#ff3333; font-weight:700; text-align:center; margin-top:20px; text-transform: uppercase;">
-            REGISTRAZIONE ATTIVA. TOCCA IL MIC.
-        </div>
-        <div id="transcript" class="transcript-box">Le tue parole appariranno qui...</div>
-        <button id="mic-btn" class="voice-btn">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
-                <path d="M12 1a4 4 0 0 0-4 4v7a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z" fill="currentColor"/>
-                <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        <div style="font-size:11px; color:#666666; margin-bottom:5px; font-weight: 600;">CALISTHENICS AUDIO COACH</div>
-    </div>
-</div>
 
-<script>
-    // Inserisci qui la tua chiave Groq se vuoi farla parlare con l'IA
-    const apiKey = "METTI_QUI_LA_TUA_CHIAVE_GROQ";
-    
-    let step = 0; 
-    let nome = "", eta = "", frequenza = "";
+    <script>
+        // Sostituisci questo URL con l'indirizzo reale del tuo server attivo su Render
+        const SERVER_URL = 'https://IL_TUO_SERVER_SU_://onrender.com';
 
-    const questionText = document.getElementById('question');
-    const setupInput = document.getElementById('setup-input');
-    const nextBtn = document.getElementById('next-btn');
-    const tutorialSection = document.getElementById('tutorial-section');
-    const voiceSection = document.getElementById('voice-section');
-    const statusText = document.getElementById('status');
-    const transcriptBox = document.getElementById('transcript');
-    const micBtn = document.getElementById('mic-btn');
-
-    nextBtn.addEventListener('click', () => {
-        const val = setupInput.value.trim();
-        if(!val) return;
-
-        setupInput.value = "";
-
-        if(step === 0) {
-            nome = val;
-            step = 1;
-            questionText.innerText = `Ottimo ${nome}. Quanti anni hai?`;
-            setupInput.placeholder = "Inserisci la tua età...";
-        } else if(step === 1) {
-            eta = val;
-            step = 2;
-            questionText.innerText = `Quante volte a settimana hai intenzione di allenarti a Calisthenics?`;
-            setupInput.placeholder = "Es: 3 volte...";
-        } else if(step === 2) {
-            frequenza = val;
-            tutorialSection.style.display = "none";
-            voiceSection.style.display = "flex";
-            statusText.innerText = `TORO ATTIVO. TOCCAMI PER PARLARE, ${nome.toUpperCase()}.`;
-        }
-    });
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'it-IT';
-        recognition.continuous = false;
-        
-        recognition.onstart = () => {
-            micBtn.classList.add('listening');
-            statusText.innerText = "TI STO ASCOLTANDO... PARLA!";
-        };
-        recognition.onend = () => { 
-            micBtn.classList.remove('listening'); 
-        };
-        
-        recognition.onresult = async (event) => {
-            const text = event.results.transcript;
-            transcriptBox.innerText = `Tu: "${text}"`;
-            statusText.innerText = "ELABORAZIONE IN CORSO...";
-
+        // GESTIONE PAGAMENTO STRIPE
+        document.getElementById('checkout-btn').addEventListener('click', async () => {
+            const statusText = document.getElementById('payment-status');
+            statusText.innerText = 'Generazione del link di pagamento...';
+            
             try {
-                const response = await fetch('https://groq.com', {
+                const response = await fetch(`${SERVER_URL}/api/monetizzazione/checkout`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [
-                            { role: "system", content: "Tu sei AI ToRo, il coach vocale di calisthenics in modalità W Motivation ed Elider. Conosci questi dati sul ragazzo: Nome: " + nome + ", Eta: " + eta + ", Allenamenti/settimana: " + frequenza + ". Rispondi con frasi brevissime, secche, motivanti e in MAIUSCOLO. Smonta ogni scusa." },
-                            { role: "user", content: text }
-                        ],
-                        temperature: 0.5
-                    })
+                    headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await response.json();
-                const botReply = data.choices.message.content;
-                statusText.innerText = "AI TORO STA PARLANDO...";
+                if (data.url) {
+                    window.location.href = data.url;
+                } else {
+                    statusText.innerText = 'Errore nella creazione della sessione.';
+                }
+            } catch (err) {
+                statusText.innerText = 'Impossibile connettersi al server.';
+                console.error(err);
+            }
+        });
 
-                const utterance = new SpeechSynthesisUtterance(botReply);
-                utterance.lang = 'it-IT';
-                utterance.rate = 1.1;
-                window.speechSynthesis.speak(utterance);
-                
-                utterance.onend = () => { statusText.innerText = "TORO ATTIVO. TOCCAMI PER PARLARE."; };
-            } catch(e) { 
-                statusText.innerText = "ERRORE DI CONNESSIONE."; 
-                  } else {
-        statusText.innerText = "IL BROWSER NON SUPPORTA IL MIC.";
-    }
+        // GESTIONE INVIO MESSAGGIO NELLA CHAT
+        document.getElementById('send-btn').addEventListener('click', async () => {
+            const username = document.getElementById('username-input').value.trim();
+            const messaggio = document.getElementById('message-input').value.trim();
+            const chatBox = document.getElementById('chat-box');
 
-    micBtn.addEventListener('click', () => {
-        if(recognition) recognition.start();
-    });
-</script>
+            if (!username || !messaggio) {
+                alert('Inserisci sia username che messaggio.');
+                return;
+            }
 
+            try {
+                const response = await fetch(`${SERVER_URL}/api/community/invia`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        utente_id: '00000000-0000-0000-0000-000000000000', // ID di test
+                        username: username,
+                        messaggio: messaggio,
+                        is_vip: false
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 400 && data.status === 'blocked') {
+                    // Gestione blocco hater
+                    alert(data.coach_msg);
+                    return;
+                }
+
+                if (response.ok) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'msg';
+                    msgDiv.innerHTML = `<strong>${username}:</strong> ${messaggio}`;
+                    chatBox.appendChild(msgDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    document.getElementById('message-input').value = '';
+                } else {
+                    alert('Errore durante l\'invio del messaggio.');
+                }
+            } catch (err) {
+                alert('Errore di connessione al server.');
+                console.error(err);
+            }
+        });
+    </script>
 </body>
 </html>
