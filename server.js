@@ -7,7 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 // Inizializzazione del client Supabase usando le variabili d'ambiente di Render per sicurezza
-const supabaseUrl = 'https://locdwwpthdnxqsssjeungsupabase.co';
+const supabaseUrl = 'https://locdwwpthdnxqsssjeung.supabase.co';
 const supabaseKey = 'sb_publishable_I_zk2KGDlzSpWlS1VuU8cw_SBkgd0-H';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
