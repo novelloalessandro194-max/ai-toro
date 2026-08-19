@@ -1,3 +1,4 @@
+const stripe = require('stripe')('sk_test_51U6B2QJ1WKMqawcdDfM3mM3MgNrNbN8baUUKvpswtxO8EC5gyiM9x5pxj2rrNZtBhJwh5FJkjlXr0lh51qekTNYk00pt5HVA5H');
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
@@ -44,4 +45,29 @@ app.post('/api/community/invia', async (req, res) => {
 
 // Porta dinamica richiesta da Render per l'hosting
 const PORT = process.env.PORT || 5000;
+app.post('/api/monetizzazione/checkout', async (req, res) => {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            line_items: [{
+                price_data: {
+                    currency: 'eur',
+                    product_data: {
+                        name: 'AI ToRØ Premium [VIP]',
+                        description: 'Accesso ai Rank d Elite e Badge Hardcore',
+                    },
+                    unit_amount: 399, // 3.99€ in centesimi
+                    recurring: { interval: 'month' },
+                },
+                quantity: 1,
+            }],
+            success_url: 'https://stripe.com',
+            cancel_url: 'https://google.com',
+        });
+        res.json({ url: session.url });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 app.listen(PORT, () => console.log(`AI ToRØ Server in ascolto sulla porta ${PORT}`));
