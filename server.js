@@ -7,8 +7,8 @@ app.use(cors());
 app.use(express.json());
 
 // Inizializzazione del client Supabase usando le variabili d'ambiente di Render per sicurezza
-const supabaseUrl = process.env.SUPABASE_URL || 'URL_SUPABASE_REALE';
-const supabaseKey = process.env.SUPABASE_KEY || 'CHIAVE_ANON_REALE';
+const supabaseUrl = 'https://supabase.co';
+const supabaseKey = 'sb_publishable_I_zk2KGDlzSpWlS1VuU8cw_SBkgd0-H';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Endpoint di test per verificare che il server sia online
