@@ -3,126 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ToRØ App</title>
+    <title>AI ToRØ</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; }
         body { background: #000; color: #FFF; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         #phone { width: 380px; height: 680px; background: #0B0C10; border: 2px solid #1F2833; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(102, 252, 241, 0.2); position: relative; }
-        #stats { height: 40px; border-bottom: 1px solid #1F2833; display: flex; justify-content: center; align-items: center; padding: 0 15px; color: #66FCF1; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
-        #content { flex: 1; padding: 20px; overflow-y: auto; background: #000; }
-        .screen { display: none; } .screen.active { display: flex; flex-direction: column; height: 100%; }
-        .btn-premium { background: #FFD700; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; text-align: center; text-decoration: none; display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); border-radius: 4px; }
-        .btn-premium:hover { background: #FFF; box-shadow: 0 0 15px #FFF; }
-        #chat-box { flex: 1; border: 1px solid #1F2833; background: #050505; padding: 12px; font-size: 11px; overflow-y: auto; margin-bottom: 15px; height: 280px; border-radius: 4px; }
-        .input-row { display: flex; border: 1px solid #1F2833; padding: 5px; background: #000; margin-bottom: 10px; border-radius: 4px; }
-        .input-row input { flex: 1; background: #000; border: none; color: #FFF; padding: 10px; font-size: 11px; }
-        .input-row input:focus { outline: none; }
-        .input-row button { background: #1F2833; border: none; color: #66FCF1; padding: 0 20px; cursor: pointer; font-weight: bold; letter-spacing: 1px; }
-        .input-row button:hover { background: #66FCF1; color: #000; }
-        #nav { height: 55px; border-top: 1px solid #1F2833; display: flex; background: #0B0C10; }
-        .nav-btn { flex: 1; background: none; border: none; color: #FFF; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-btn.active { color: #66FCF1; border-top: 2px solid #66FCF1; background: rgba(102, 252, 241, 0.05); }
-        #error-overlay { display: none; position: absolute; top: 40px; left: 0; width: 100%; bottom: 0; background: rgba(0,0,0,0.9); z-index: 10; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        #error-overlay p { color: #FF0055; font-size: 12px; margin-bottom: 15px; line-height: 1.5; }
+        #stats { height: 60px; border-bottom: 1px solid #1F2833; display: flex; justify-content: center; align-items: center; background: #0B0C10; }
+        #stats h1 { color: #66FCF1; font-size: 24px; font-weight: bold; letter-spacing: 3px; text-transform: uppercase; }
+        #content { flex: 1; padding: 30px; display: flex; flex-direction: column; justify-content: center; background: #000; position: relative; }
+        .btn-premium { background: #FFD700; color: #000; border: none; padding: 18px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; display: block; font-size: 15px; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); border-radius: 4px; margin-top: 20px; }
+        .btn-premium:hover { background: #FFF; box-shadow: 0 0 25px #FFF; color: #000; }
+        #payment-status { text-align: center; margin-top: 30px; color: #ffcc00; font-size: 12px; line-height: 1.4; font-weight: bold; }
+        #error-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        #error-overlay p { color: #FF0055; font-size: 13px; margin-bottom: 25px; line-height: 1.5; font-weight: bold; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
 <div id="phone">
-    <div id="error-overlay">
-        <p>CONNESSIONE AL SERVER ASSENTE.<br>RIPROVA TRA QUALCHE ISTANTE.</p>
-        <button style="background:#1F2833; color:#66FCF1; border:none; padding:10px 20px; cursor:pointer;" onclick="controllaServer()">RICONNETTI</button>
+    <!-- Intestazione focalizzata solo sul brand -->
+    <div id="stats">
+        <h1>AI ToRØ</h1>
     </div>
-
-    <!-- Barra superiore d'élite pulita senza spie -->
-    <div id="stats"><span>AI ToRØ ELITE v1.0</span></div>
     
     <div id="content">
-        <div id="scr-work" class="screen active">
-            <h2 style="color: #66FCF1; text-align: center; margin-top: 40px; font-size: 22px; letter-spacing: 2px;">AI ToRØ PREMIUM</h2>
-            <p style="font-size: 11px; text-align: center; margin-top: 15px; color: #66FCF1; line-height: 1.6; max-width: 90%; margin-left: auto; margin-right: auto;">Accedi alla stanza segreta degli atleti d'élite. Sblocca le routine hardcore e ottieni il Badge VIP.</p>
-            <button class="btn-premium" onclick="pagaAbbonamento()">Attiva Abbonamento (3,99€)</button>
-            <p id="payment-status" style="text-align: center; margin-top: 20px; color: #ffcc00; font-size: 11px; line-height: 1.4;"></p>
+        <!-- Schermata di blocco se il server è offline -->
+        <div id="error-overlay">
+            <p>CONNESSIONE AL SERVER ASSENTE.<br>RIPROVA TRA QUALCHE ISTANTE.</p>
+            <button style="background:#1F2833; color:#66FCF1; border:1px solid #66FCF1; padding:12px 24px; cursor:pointer; font-weight:bold; font-family:'Courier New', monospace; letter-spacing:1px;" onclick="controllaServer()">RICONNETTI</button>
         </div>
 
-        <div id="scr-chat" class="screen">
-            <h3 style="color: #66FCF1; font-size: 14px; margin-bottom: 15px; text-align: center; letter-spacing: 1px;">SALA CHAT DI GRUPPO</h3>
-            <div id="chat-box"></div>
-            <div class="input-row">
-                <input type="text" id="username-input" placeholder="Imposta il tuo nome atleta...">
-            </div>
-            <div class="input-row">
-                <input type="text" id="chat-in" placeholder="Invia un messaggio alla community...">
-                <button onclick="inviaMessaggioReale()">INVIA</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="nav">
-        <button class="nav-btn active" onclick="tab('work', this)">Premium</button>
-        <button class="nav-btn" onclick="tab('chat', this)">Chat Real-Time</button>
+        <!-- Contenuto principale pulito senza distrazioni -->
+        <button class="btn-premium" onclick="pagaAbbonamento()">Attiva Abbonamento (3,99€)</button>
+        <p id="payment-status"></p>
     </div>
 </div>
 
 <script>
-    // URL del server di Render confermato funzionante dalla tua foto
     const SERVER_URL = 'https://onrender.com';
 
     async function controllaServer() {
         const overlay = document.getElementById('error-overlay');
         try {
             const res = await fetch(SERVER_URL + '/');
-            if (res.ok) { overlay.style.display = 'none'; }
-        } catch(e) { overlay.style.display = 'flex'; }
+            if (res.ok) { 
+                overlay.style.display = 'none'; 
+            } else {
+                overlay.style.display = 'flex';
+            }
+        } catch(e) { 
+            overlay.style.display = 'flex'; 
+        }
     }
     controllaServer();
 
-    function tab(id, btn) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('scr-' + id).classList.add('active');
-        btn.classList.add('active');
-    }
-
     async function pagaAbbonamento() {
         const statusText = document.getElementById('payment-status');
-        statusText.innerText = "Reindirizzamento verso la piattaforma Stripe...";
+        statusText.innerText = "REINDIRIZZAMENTO VERSO STRIPE...";
         try {
             const res = await fetch(`${SERVER_URL}/api/monetizzazione/checkout`, { method: 'POST' });
             const data = await res.json();
             if(data.url) { window.location.href = data.url; } 
-            else { statusText.innerText = "Errore di configurazione del server."; }
-        } catch(e) { statusText.innerText = "Errore di connessione. Verifica il server."; }
-    }
-
-    async function inviaMessaggioReale() {
-        const userIn = document.getElementById('username-input');
-        const input = document.getElementById('chat-in');
-        const username = userIn.value.trim() || 'Atleta_ToRØ';
-        const msg = input.value.trim();
-        if(!msg) return;
-
-        try {
-            const res = await fetch(`${SERVER_URL}/api/community/invia`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    utente_id: "00000000-0000-0000-0000-000000000000",
-                    username: username,
-                    messaggio: msg,
-                    is_vip: false
-                })
-            });
-            const data = await res.json();
-            const chatBox = document.getElementById('chat-box');
-            if(res.status === 400) {
-                chatBox.innerHTML += `<div style="color:#FF0055; margin-bottom:6px;"><b>[SISTEMA]:</b> ${data.error}</div>`;
-            } else {
-                chatBox.innerHTML += `<div style="margin-bottom:6px; color:#FFF;"><b>${username}:</b> ${msg}</div>`;
-            }
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        } catch(e) { alert("Impossibile raggiungere il server della chat."); }
+            else { statusText.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER."; }
+        } catch(e) { statusText.innerText = "ERRORE DI CONNESSIONE. VERIFICA IL SERVER."; }
     }
 </script>
 </body>
