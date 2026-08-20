@@ -7,11 +7,11 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; }
         body { background: #000; color: #FFF; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        #phone { width: 380px; height: 680px; background: #0B0C10; border: 2px solid #1F2833; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(102, 252, 241, 0.2); }
-        #stats { height: 40px; border-bottom: 1px solid #1F2833; display: flex; justify-content: space-between; align-items: center; padding: 0 15px; color: #66FCF1; font-size: 11px; }
+        #phone { width: 380px; height: 680px; background: #0B0C10; border: 2px solid #1F2833; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(102, 252, 241, 0.2); position: relative; }
+        #stats { height: 40px; border-bottom: 1px solid #1F2833; display: flex; justify-content: center; align-items: center; padding: 0 15px; color: #66FCF1; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
         #content { flex: 1; padding: 20px; overflow-y: auto; background: #000; }
         .screen { display: none; } .screen.active { display: flex; flex-direction: column; height: 100%; }
-        .btn-premium { background: #FFD700; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; text-align: center; text-decoration: none; display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); }
+        .btn-premium { background: #FFD700; color: #000; border: none; padding: 15px; font-weight: bold; cursor: pointer; margin-top: 20px; text-align: center; text-decoration: none; display: block; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); border-radius: 4px; }
         .btn-premium:hover { background: #FFF; box-shadow: 0 0 15px #FFF; }
         #chat-box { flex: 1; border: 1px solid #1F2833; background: #050505; padding: 12px; font-size: 11px; overflow-y: auto; margin-bottom: 15px; height: 280px; border-radius: 4px; }
         .input-row { display: flex; border: 1px solid #1F2833; padding: 5px; background: #000; margin-bottom: 10px; border-radius: 4px; }
@@ -22,15 +22,22 @@
         #nav { height: 55px; border-top: 1px solid #1F2833; display: flex; background: #0B0C10; }
         .nav-btn { flex: 1; background: none; border: none; color: #FFF; font-size: 11px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .nav-btn.active { color: #66FCF1; border-top: 2px solid #66FCF1; background: rgba(102, 252, 241, 0.05); }
+        #error-overlay { display: none; position: absolute; top: 40px; left: 0; width: 100%; bottom: 0; background: rgba(0,0,0,0.9); z-index: 10; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        #error-overlay p { color: #FF0055; font-size: 12px; margin-bottom: 15px; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div id="phone">
-    <div id="stats"><span>AI ToRØ v1.0</span><span id="server-status">SERVER: CONNETTENDO... 🟡</span></div>
+    <div id="error-overlay">
+        <p>CONNESSIONE AL SERVER ASSENTE.<br>RIPROVA TRA QUALCHE ISTANTE.</p>
+        <button style="background:#1F2833; color:#66FCF1; border:none; padding:10px 20px; cursor:pointer;" onclick="controllaServer()">RICONNETTI</button>
+    </div>
+
+    <!-- Barra superiore d'élite pulita senza spie -->
+    <div id="stats"><span>AI ToRØ ELITE v1.0</span></div>
     
     <div id="content">
-        <!-- AGGIORNAMENTO SEZIONE PREMIUM -->
         <div id="scr-work" class="screen active">
             <h2 style="color: #66FCF1; text-align: center; margin-top: 40px; font-size: 22px; letter-spacing: 2px;">AI ToRØ PREMIUM</h2>
             <p style="font-size: 11px; text-align: center; margin-top: 15px; color: #66FCF1; line-height: 1.6; max-width: 90%; margin-left: auto; margin-right: auto;">Accedi alla stanza segreta degli atleti d'élite. Sblocca le routine hardcore e ottieni il Badge VIP.</p>
@@ -38,7 +45,6 @@
             <p id="payment-status" style="text-align: center; margin-top: 20px; color: #ffcc00; font-size: 11px; line-height: 1.4;"></p>
         </div>
 
-        <!-- AGGIORNAMENTO SEZIONE COMMUNITY CHAT -->
         <div id="scr-chat" class="screen">
             <h3 style="color: #66FCF1; font-size: 14px; margin-bottom: 15px; text-align: center; letter-spacing: 1px;">SALA CHAT DI GRUPPO</h3>
             <div id="chat-box"></div>
@@ -59,22 +65,15 @@
 </div>
 
 <script>
-    // URL reale ed operativo collegato al tuo backend su Render
+    // URL del server di Render confermato funzionante dalla tua foto
     const SERVER_URL = 'https://onrender.com';
 
-    // Controllo automatico dello stato di connessione con la tua macchina Render
     async function controllaServer() {
+        const overlay = document.getElementById('error-overlay');
         try {
             const res = await fetch(SERVER_URL + '/');
-            if (res.ok) {
-                document.getElementById('server-status').innerText = 'SERVER: ONLINE 🟢';
-                document.getElementById('server-status').style.color = '#00FF66';
-            }
-        } catch(e) {
-            document.getElementById('server-status').innerText = 'SERVER: OFFLINE 🔴';
-            document.getElementById('server-status').style.color = '#FF0055';
-            document.getElementById('payment-status').innerText = 'Connessione in corso... Se il server era spento può richiedere fino a un minuto.';
-        }
+            if (res.ok) { overlay.style.display = 'none'; }
+        } catch(e) { overlay.style.display = 'flex'; }
     }
     controllaServer();
 
@@ -85,24 +84,17 @@
         btn.classList.add('active');
     }
 
-    // INTEGRAZIONE DI CHECKOUT SICURO CON STRIPE
     async function pagaAbbonamento() {
         const statusText = document.getElementById('payment-status');
-        statusText.innerText = "Reindirizzamento verso la piattaforma di pagamento protetta Stripe...";
+        statusText.innerText = "Reindirizzamento verso la piattaforma Stripe...";
         try {
             const res = await fetch(`${SERVER_URL}/api/monetizzazione/checkout`, { method: 'POST' });
             const data = await res.json();
-            if(data.url) {
-                window.location.href = data.url; 
-            } else {
-                statusText.innerText = "Risposta anomala dal server: " + (data.error || "Parametri non configurati.");
-            }
-        } catch(e) {
-            statusText.innerText = "Errore di rete. Verifica che la macchina su Render sia nello stato Live.";
-        }
+            if(data.url) { window.location.href = data.url; } 
+            else { statusText.innerText = "Errore di configurazione del server."; }
+        } catch(e) { statusText.innerText = "Errore di connessione. Verifica il server."; }
     }
 
-    // LOGICA DI COMUNICAZIONE INTERNA CON DATABASE SUPABASE E BAN AUTOMATICO
     async function inviaMessaggioReale() {
         const userIn = document.getElementById('username-input');
         const input = document.getElementById('chat-in');
@@ -121,23 +113,16 @@
                     is_vip: false
                 })
             });
-
             const data = await res.json();
             const chatBox = document.getElementById('chat-box');
-            
             if(res.status === 400) {
-                // Intercettazione del filtro di moderazione inserito nel backend
-                chatBox.innerHTML += `<div style="color:#FF0055; margin-bottom:6px; padding: 4px; border-left: 2px solid #FF0055;"><b>[SISTEMA]:</b> ${data.error}</div>`;
-                chatBox.innerHTML += `<div style="color:#FFD700; margin-bottom:12px; padding: 4px; background: rgba(255,215,0,0.05);"><b>[COACH]:</b> ${data.coach_msg}</div>`;
+                chatBox.innerHTML += `<div style="color:#FF0055; margin-bottom:6px;"><b>[SISTEMA]:</b> ${data.error}</div>`;
             } else {
-                // Messaggio approvato con successo
                 chatBox.innerHTML += `<div style="margin-bottom:6px; color:#FFF;"><b>${username}:</b> ${msg}</div>`;
             }
             input.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
-        } catch(e) {
-            alert("Impossibile raggiungere il server della chat.");
-        }
+        } catch(e) { alert("Impossibile raggiungere il server della chat."); }
     }
 </script>
 </body>
