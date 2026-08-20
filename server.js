@@ -1,26 +1,35 @@
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
-const stripe = require('stripe')('sk_test_51BTB0sD9Nx771uEpxxxxxxxxxx'); // Sostituisci con la tua chiave segreta reale di Stripe
+
+// Inserisci qui la tua chiave segreta reale di Stripe
+const stripe = require('stripe')('sk_test_51BTB0sD9Nx771uEpxxxxxxxxxx'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Configurazione CORS totale per sbloccare i telefoni
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true
 }));
+
 app.use(express.json());
 
-// Inizializzazione del client Supabase
-const supabaseUrl = 'https://supabase.co'; // La tua url reale
-const supabaseKey = 'sb_publishable_I_zkxxxxxxxxx'; // La tua chiave reale
+// Gestione pre-flight per CORS (mossa di sicurezza)
+app.options('*', cors());
+
+// Inizializzazione del client Supabase (lascia i tuoi dati reali qui sotto)
+const supabaseUrl = 'https://supabase.co'; 
+const supabaseKey = 'sb_publishable_I_zkxxxxxxxxx'; 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Endpoint di test
+// Rotta principale per il controllo di connessione dell'app
 app.get('/', (req, res) => {
-    res.send('AI ToRØ Server online e operativo!');
+    res.setHeader('Content-Type', 'text/plain');
+    res.status(200).send('OK');
 });
 
 // GESTIONE DELLA CHAT COMMUNITY
