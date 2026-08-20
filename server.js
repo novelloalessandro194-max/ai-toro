@@ -1,76 +1,76 @@
-const stripe = require('stripe')('sk_test_51U6B2QJ1WKMqawcdDfM3mM3MgNrNbN8baUUKvpswtxO8EC5gyiM9x5pxj2rrNZtBhJwh5FJkjlXr0lh51qekTNYk00pt5HVA5H');
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
+const stripe = require('stripe')('sk_test_51BTB0sD9Nx771uEpxxxxxxxxxx'); // Sostituisci con la tua chiave segreta reale di Stripe
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors({
     origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
-// Inizializzazione del client Supabase usando le variabili d'ambiente di Render per sicurezza
-const supabaseUrl = 'https://locdwwpthdnxqsssjeug.supabase.co';
-const supabaseKey = 'sb_publishable_I_zk2KGDlzSpWlS1VuU8cw_SBkgd0-H';
+// Inizializzazione del client Supabase
+const supabaseUrl = 'https://supabase.co'; // La tua url reale
+const supabaseKey = 'sb_publishable_I_zkxxxxxxxxx'; // La tua chiave reale
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Endpoint di test per verificare che il server sia online
+// Endpoint di test
 app.get('/', (req, res) => {
     res.send('AI ToRØ Server online e operativo!');
 });
 
-// GESTIONE DELLA CHAT COMMUNITY E BLOCCO DEGLI HATER
+// GESTIONE DELLA CHAT COMMUNITY
 app.post('/api/community/invia', async (req, res) => {
     const { utente_id, username, messaggio, is_vip } = req.body;
-    
-    // Filtro anti-hater hardcore (Filtro Insicurezze)
-    const paroleProibite = ['schifo', 'fallito', 'insulto', 'pippa'];
+    const paroleProibite = ['schifo', 'fallito'];
     const contieneInsulto = paroleProibite.some(parola => messaggio.toLowerCase().includes(parola));
 
     if (contieneInsulto) {
-        // Enforce block and route to recovery
-        return res.status(400).json({ 
-            status: 'blocked', 
-            error: 'Messaggio intercettato.',
-            coach_msg: 'Qui si costruisce, non si distrugge. Quale insicurezza ti spinge a insultare? Parliamone nella Chat di Recupero.'
+        return res.status(400).json({
+            status: 'blocked',
+            error: 'Messaggio intercettato dal sistema.',
+            coach_msg: 'Qui si costruisce, non si distrugge.'
         });
     }
 
-    // Se il messaggio è pulito, viene registrato nel database Supabase vero
-    const { data, error } = await supabase
-        .from('messaggi_community')
-        .insert([{ utente_id, username, messaggio, is_vip }]);
-
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json({ status: 'success', data });
+    try {
+        const { data, error } = await supabase
+            .from('messaggi_chat')
+            .insert([{ utente_id, username, messaggio, is_vip }]);
+        if (error) throw error;
+        res.json({ status: 'success', data });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
-// Porta dinamica richiesta da Render per l'hosting
-const PORT = process.env.PORT || 5000;
+// ROTTA CHECKOUT STRIPE
 app.post('/api/monetizzazione/checkout', async (req, res) => {
     try {
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
-            mode: 'subscription',
             line_items: [{
                 price_data: {
                     currency: 'eur',
-                    product_data: {
-                        name: 'AI ToRØ Premium [VIP]',
-                        description: 'Accesso ai Rank d Elite e Badge Hardcore',
-                    },
-                    unit_amount: 399, // 3.99€ in centesimi
-                    recurring: { interval: 'month' },
+                    product_data: { name: 'AI ToRØ Premium' },
+                    unit_amount: 399,
                 },
                 quantity: 1,
             }],
-            success_url: 'https://stripe.com',
-            cancel_url: 'https://google.com',
+            mode: 'payment',
+            success_url: 'https://github.io{CHECKOUT_SESSION_ID}',
+            cancel_url: 'https://github.io',
         });
         res.json({ url: session.url });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
 });
-app.listen(PORT, () => console.log(`AI ToRØ Server in ascolto sulla porta ${PORT}`));
+
+app.listen(PORT, () => {
+    console.log(`Server in esecuzione sulla porta ${PORT}`);
+});
