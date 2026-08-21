@@ -10,7 +10,8 @@ const PORT = process.env.PORT || 3000;
 
 // Configurazione CORS totale per sbloccare i telefoni
 app.use(cors({
-  origin: 'https://novelloalessandro194-max.github.io/ai-toro/',
+  origin: '  origin: 'https://novelloalessandro194-max.github.io',
+',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true
