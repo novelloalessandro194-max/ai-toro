@@ -10,10 +10,10 @@ const PORT = process.env.PORT || 3000;
 
 // Configurazione CORS totale per sbloccare i telefoni
 app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-    credentials: true
+  origin: 'https://github.io',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true
 }));
 
 app.use(express.json());
