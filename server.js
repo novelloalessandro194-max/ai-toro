@@ -10,8 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 // Configurazione CORS totale per sbloccare i telefoni
 app.use(cors({
-  origin: '  origin: 'https://novelloalessandro194-max.github.io',
-',
+  origin:'https://novelloalessandro194-max.github.io',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   credentials: true
@@ -53,29 +52,6 @@ app.post('/api/community/invia', async (req, res) => {
             .insert([{ utente_id, username, messaggio, is_vip }]);
         if (error) throw error;
         res.json({ status: 'success', data });
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
-});
-
-// ROTTA CHECKOUT STRIPE
-app.post('/api/monetizzazione/checkout', async (req, res) => {
-    try {
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{
-                price_data: {
-                    currency: 'eur',
-                    product_data: { name: 'AI ToRØ Premium' },
-                    unit_amount: 399,
-                },
-                quantity: 1,
-            }],
-            mode: 'payment',
-            success_url: 'https://github.io{CHECKOUT_SESSION_ID}',
-            cancel_url: 'https://github.io',
-        });
-        res.json({ url: session.url });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
