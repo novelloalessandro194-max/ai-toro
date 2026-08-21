@@ -3,7 +3,7 @@ const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 
 // Inserisci qui la tua chiave segreta reale di Stripe
-const stripe = require('stripe')('sk_test_51BTB0sD9Nx771uEpxxxxxxxxxx'); 
+const stripe = require('stripe')('sk_test_51U6B2QJ1WKMqawcdDfM3mM3MgNrNbN8baUUKvpswtxO8EC5gyiM9x5pxj2rrNZtBhJwh5FJkjlXr0lh51qekTNYk00pt5HVA5H'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,7 +24,7 @@ app.options('*', cors());
 
 // Inizializzazione del client Supabase (lascia i tuoi dati reali qui sotto)
 const supabaseUrl = 'https://supabase.co'; 
-const supabaseKey = 'sb_publishable_I_zkxxxxxxxxx'; 
+const supabaseKey = 'sb_secret_PZ6VTGClcm1a-t91S1pMXg_mj7HbFqU'; 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Rotta principale per il controllo di connessione dell'app
