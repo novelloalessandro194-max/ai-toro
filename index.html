@@ -3,462 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ToRØ - Smart Gym Assistant</title>
+    <title>AI ToRØ - Official App</title>
+    
     <style>
-        /* STRUTTURA GENERALE APP CYBERPUNK */
+        /* --- GRAFICA CYBERPUNK GENERALE --- */
         body {
-            background-color: #08080a;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding-bottom: 90px;
-            color: #fff;
+            padding: 20px;
             text-align: center;
         }
-        #app-header {
-            padding: 15px;
-            border-bottom: 1px solid #23262F;
-            background: #08080a;
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #111111;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #222222;
+            box-shadow: 0px 0px 20px rgba(0, 210, 255, 0.1);
         }
-        #app-header h1 {
-            margin: 0;
-            font-size: 20px;
-            color: #66FCF1;
-            letter-spacing: 2px;
-            font-weight: 800;
+
+        h1 {
+            color: #00d2ff;
+            font-size: 28px;
+            margin-bottom: 10px;
         }
-        .section-title {
-            color: #66FCF1;
-            font-size: 18px;
+
+        p.subtitle {
+            color: #aaaaaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* --- BLOCCO ABBONAMENTO PRINCIPALE --- */
+        .subscription-card {
+            border: 2px solid #ffcc00;
+            background: #1a1a00;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0px 0px 15px rgba(255, 204, 0, 0.2);
+        }
+
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffcc00;
             margin: 15px 0;
-            text-align: left;
-            font-weight: 600;
-        }
-        .app-section {
-            padding: 15px;
-            max-width: 450px;
-            margin: 0 auto;
-            box-sizing: border-box;
         }
 
-        /* WIDGET LETTORE MUSICALE */
-        #gym-music-player {
-            background: #141416;
-            border: 1px solid #23262F;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
-        .player-info { display: flex; align-items: center; text-align: left; }
-        .music-icon { font-size: 22px; margin-right: 12px; }
-        .track-details h4 { margin: 0; color: #fff; font-size: 14px; font-weight: 600; }
-        .track-details p { margin: 3px 0 0 0; color: #777E90; font-size: 11px; }
-        .player-controls { display: flex; align-items: center; gap: 10px; }
-        .music-btn {
-            background: #23262F; border: none; color: #fff; width: 35px; height: 35px;
-            border-radius: 50%; font-size: 14px; cursor: pointer; display: flex;
-            justify-content: center; align-items: center; transition: 0.2s;
-        }
-        .music-btn:hover { background: #353945; }
-        .music-btn.main-play { background: #66FCF1; color: #000; width: 40px; height: 40px; font-size: 16px; }
-        @keyframes musicPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
-        }
-
-        /* CARDS ESERCIZI */
-        .exercise-card {
-            background: #141416;
-            border: 1px solid #23262F;
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .btn-pay {
+            background-color: #ffcc00;
+            color: #000000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .exercise-card:hover { border-color: #66FCF1; }
-        .ex-info { text-align: left; }
-        .ex-info h3 { margin: 0; color: #fff; font-size: 16px; font-weight: 600; }
-        .ex-info p { margin: 5px 0 0 0; color: #777E90; font-size: 12px; }
-        .play-btn {
-            color: #66FCF1; font-size: 13px; font-weight: 700;
-            background: rgba(102, 252, 241, 0.1); padding: 8px 14px; border-radius: 20px;
+            width: 100%;
+            transition: transform 0.2s;
         }
 
-        /* CARD SCHEDA ABBONAMENTO VIA STRIPE */
-        .premium-benefits-card {
-            background: #141416;
-            border: 1px solid #FFD700;
-            border-radius: 16px;
+        .btn-pay:hover {
+            transform: scale(1.02);
+        }
+
+        .error-message {
+            color: #ff3333;
+            font-size: 13px;
+            margin-top: 15px;
+            font-weight: bold;
+            display: none; /* Gestito via JS */
+        }
+
+        /* --- OVERLAY TUTORIAL INIZIALE (ONBOARDING) --- */
+        .tutorial-container {
+            position: fixed;
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: #0a0a0a;
+            z-index: 9999; /* Copre l'app all'avvio */
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+
+        .tutorial-slide {
+            display: none;
+            text-align: center;
             padding: 20px;
-            text-align: left;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.1);
-        }
-        .premium-benefits-card h3 { color: #FFD700; margin-top: 0; font-size: 16px; }
-        .premium-benefits-card ul { padding-left: 20px; color: #b1b5c3; font-size: 13px; line-height: 20px; }
-        .premium-benefits-card li { margin-bottom: 10px; }
-        .yellow-stripe-btn {
-            width: 100%; background: #FFD700; color: #000; border: none; padding: 16px;
-            font-size: 15px; font-weight: 800; border-radius: 12px; cursor: pointer;
-            margin-top: 15px; text-transform: uppercase; box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+            max-width: 80%;
         }
 
-        /* PULSANTE FLUTTUANTE TORO IA (SEMPRE FISSO A DESTRA) */
-        #floating-toro-btn {
-            position: fixed; bottom: 100px; right: 20px; width: 65px; height: 65px;
-            background: linear-gradient(135deg, #66FCF1, #45a29e); border: none;
-            border-radius: 50%; font-size: 30px; display: flex; justify-content: center;
-            align-items: center; box-shadow: 0 4px 20px rgba(102, 252, 241, 0.4); z-index: 999; cursor: pointer;
+        .tutorial-slide.active {
+            display: block;
         }
 
-        /* BARRA DI NAVIGAZIONE IN BASSO STILE LIFTOFF */
-        #bottom-nav-bar {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-            background: #141416; border-top: 1px solid #23262F; display: flex;
-            justify-content: space-around; align-items: center; z-index: 1000;
+        .tutorial-slide h2 { 
+            color: #00d2ff; 
+            font-size: 26px; 
+            margin-bottom: 15px; 
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; color: #777E90; cursor: pointer; font-size: 11px; font-weight: 500; }
-        .nav-item.active { color: #66FCF1; }
-        .nav-icon { font-size: 20px; margin-bottom: 4px; }
 
-        /* INTERFACCIA ASSISTENTE ATTIVO */
-        #ai-assistant-modal { padding: 20px; max-width: 450px; margin: 0 auto; }
-        #premium-camera-zone { width: 100%; height: 240px; background: #000; border-radius: 12px; overflow: hidden; position: relative; margin: 15px 0; border: 2px dashed #FFD700; }
-        #webcam { width: 100%; height: 100%; object-fit: cover; }
-        .ai-status-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: #FFD700; padding: 5px 10px; font-size: 10px; border-radius: 20px; font-weight: bold; }
-        .ai-voice-panel { margin-top: 20px; }
-        .pulse-ring { font-size: 40px; margin: 10px auto; }
-        #rep-counter { font-size: 84px; color: #66FCF1; margin: 10px 0; font-weight: bold; }
+        .tutorial-slide p { 
+            color: #ffffff; 
+            font-size: 16px; 
+            margin-bottom: 35px; 
+            line-height: 1.5; 
+        }
+
+        .tutorial-slide button {
+            background: #00d2ff; 
+            color: #000000; 
+            border: none;
+            padding: 14px 35px; 
+            font-weight: bold; 
+            font-size: 16px;
+            border-radius: 6px; 
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="app-header">
-        <h1>AI TORØ</h1>
-    </div>
-
-    <!-- PULSANTE FLUTTUANTE DEL TORO PER PARLARE IN QUALSIASI MOMENTO -->
-    <button id="floating-toro-btn" onclick="attivaIAGenerale()">🐂</button>
-
-    <!-- PASTE SEZIONI DEL CORPO DELL'APP -->
-    <div id="app-sections-container">
+    <!-- 1. SCHEDE DEL TUTORIAL INIZIALE -->
+    <div id="tutorial-overlay" class="tutorial-container">
+        <!-- Scheda 1 -->
+        <div class="tutorial-slide active" id="slide-1">
+            <h2>Benvenuto su AI ToRØ 🦾</h2>
+            <p>L'intelligenza artificiale d'élite creata per ottimizzare la tua mente, il tuo fisico e il tuo business.</p>
+            <button onclick="nextSlide(2)">Avanti ➡️</button>
+        </div>
         
-        <!-- SCHEDA 1: ALLENAMENTO -->
-        <div id="section-allenamento" class="app-section">
-            
-            <!-- MUSIC PLAYER GENERALE -->
-            <div id="gym-music-player">
-                <div class="player-info">
-                    <span class="music-icon">🎵</span>
-                    <div class="track-details">
-                        <h4 id="track-title">ToRØ Phonk Gym Beat 01</h4>
-                        <p id="track-status">In pausa</p>
-                    </div>
-                </div>
-                <div class="player-controls">
-                    <button class="music-btn" onclick="prevTraccia()">⏮</button>
-                    <button id="play-music-btn" class="music-btn main-play" onclick="toggleMusica()">▶</button>
-                    <button class="music-btn" onclick="nextTraccia()">⏭</button>
-                </div>
-                <audio id="gym-audio" src="https://soundhelix.com" loop></audio>
-            </div>
-
-            <h2 class="section-title">Allenamento di oggi</h2>
-            
-            <div class="exercise-card" onclick="avviaAllenamento('Push-up (Flessioni)', 10, 60)">
-                <div class="ex-info">
-                    <h3>Push-up (Flessioni)</h3>
-                    <p>Target: Petto e Tricipiti • 4 Serie</p>
-                </div>
-                <span class="play-btn">▶ Inizia</span>
-            </div>
-
-            <div class="exercise-card" onclick="avviaAllenamento('Trazioni alla sbarra', 8, 60)">
-                <div class="ex-info">
-                    <h3>Trazioni alla sbarra</h3>
-                    <p>Target: Dorso e Bicipiti • 4 Serie</p>
-                </div>
-                <span class="play-btn">▶ Inizia</span>
-            </div>
+        <!-- Scheda 2 -->
+        <div class="tutorial-slide" id="slide-2">
+            <h2>Potenza Computazionale ⚡</h2>
+            <p>Analisi di dati, codice e strategie in tempo reale direttamente sul tuo server dedicato di Render.</p>
+            <button onclick="nextSlide(3)">Avanti ➡️</button>
         </div>
-
-        <!-- SCHEDA 2: ABBONAMENTO -->
-        <div id="section-abbonamento" class="app-section" style="display: none;">
-            <h2 class="section-title">Passa a AI ToRØ VIP</h2>
-            
-            <div class="premium-benefits-card">
-                <h3>Vantaggi esclusivi dell'Abbonamento:</h3>
-                <ul>
-                    <li><strong>AI Vision Telecamera:</strong> L'IA attiva la fotocamera frontale, ti analizza al millimetro, conta l'esecuzione e ti corregge a voce.</li>
-                    <li><strong>IA Vocale Continua:</strong> Parla con il Toro premendo il tasto fluttuante in qualsiasi momento per ricevere consigli istantanei.</li>
-                    <li><strong>Gestione Serie e Riposo:</strong> Il Coach ti dice quando fermarti e avvia il timer, abbassando la musica in automatico.</li>
-                </ul>
-                
-                <button id="btn-paga-premium" class="yellow-stripe-btn" onclick="pagaAbbonamento()">
-                    ATTIVA ABBONAMENTO (3,99€)
-                </button>
-                <div id="payment-status" style="margin-top: 15px; font-weight: bold;"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCHERMATA ASSISTENTE DURANTE IL WORKOUT -->
-    <div id="ai-assistant-modal" class="app-section" style="display: none;">
-        <h2 id="current-ex-title" style="color: #fff; margin: 0;">Esercizio</h2>
         
-        <div id="premium-camera-zone" style="display: none;">
-            <video id="webcam" autoplay playsinline></video>
-            <div class="ai-status-badge">AI Vision: Attiva</div>
-        </div>
-
-        <div class="ai-voice-panel">
-            <div class="pulse-ring">🎙️</div>
-                        <p id="ai-speech-text">"Pronto a spaccare? L'IA ti sta ascoltando."</p>
-            <h1 id="rep-counter">0</h1>
-            <div id="timer-display" style="display: none; color: #FFD700; font-size: 22px; font-weight: bold;">Riposo: <span id="timer-seconds">60</span>s</div>
-        </div>
-
-        <button onclick="chiudiAllenamento()" style="background: #FF5555; border: none; padding: 14px 28px; border-radius: 12px; color: #fff; font-weight: bold; width: 100%; margin-top: 20px; font-size: 15px;">Interrompi Allenamento</button>
-    </div>
-
-    <!-- BARRA DI NAVIGAZIONE IN BASSO STILE LIFTOFF -->
-    <div id="bottom-nav-bar">
-        <div id="nav-btn-allenamento" class="nav-item active" onclick="cambiaSezione('allenamento')">
-            <span class="nav-icon">💪</span>
-            <span class="nav-text">Allenamento</span>
-        </div>
-        <div id="nav-btn-abbonamento" class="nav-item" onclick="cambiaSezione('abbonamento')">
-            <span class="nav-icon">👑</span>
-            <span class="nav-text">Abbonamento</span>
+        <!-- Scheda 3 -->
+        <div class="tutorial-slide" id="slide-3">
+            <h2>Sblocca il Potere Assoluto 👑</h2>
+            <p>Attiva l'abbonamento tramite Stripe Sandbox ed entra nel server privato per formattare ogni bug della tua realtà.</p>
+            <button onclick="chiudiTutorial()">Entra nell'App 🔥</button>
         </div>
     </div>
 
+    <!-- 2. INTERFACCIA APP UFFICIALE -->
+    <div class="container">
+        <h1>AI ToRØ</h1>
+        <p class="subtitle">Console di Controllo Principale v1.0</p>
+        
+        <!-- SEZIONE ABBONAMENTO STRIPE -->
+        <div class="subscription-card">
+            <h2>ACCESSO LIVE SERVER</h2>
+            <p>Sblocca tutte le feature e i moduli computazionali avanzati dell'intelligenza artificiale.</p>
+            <div class="price">3,99 € <span style="font-size: 14px; color: #aaaaaa;">/ mese</span></div>
+            <button class="btn-pay" onclick="attivaAbbonamento()">ATTIVA ABBONAMENTO 🔥</button>
+            <div id="error-overlay" class="error-message">ERRORE DI CONNESSIONE. VERIFICA IL SERVER.</div>
+        </div>
+    </div>
+
+    <!-- 3. LOGICA JAVASCRIPT DI LOGICA ED EVOLUZIONE -->
     <script>
-                // CONFIGURAZIONE SERVER E UTENTE
-        const SERVER_URL = 'https://onrender.com';
-        let utenteAbbonato = true; // Riconosce che tu sei il King abbonato e attiva la fotocamera
-        
-        let ripetizioni = 0;
-        let timerRiposo;
-        let tutorialCompletato = false;
+        // CONFIGURAZIONE DELLE API (Modifica con i tuoi URL e chiavi reali)
+        const SERVER_URL = "https://IL_TUO_://onrender.com"; 
+        const STRIPE_PUBLIC_KEY = "pk_test_INSERISCI_QUI_LA_TUA_CHIAVE_DI_STRIPE";
 
-        // CONTROLLO AVVIO: PARTE IL TUTORIAL OBBLIGATORIO
-        window.onload = function() {
-            // Controlliamo se l'utente ha già fatto il tutorial in passato
-            if (!localStorage.getItem('toro_tutorial_fatto')) {
-                avviaTutorialIniziale();
-            } else {
-                tutorialCompletato = true;
-                aiParla("Benvenuto su AI ToRØ. Il server è online. Seleziona il tuo allenamento.");
-            }
-        };
-
-        // INTERFACCIA VOCALE COREOGRAFATA - VOCE DA COACH MASCHILE
-        function aiParla(testo) {
-            regolaVolumeMusica(true); // Abbassa la musica di sottofondo
-            
-            const coachVoice = new SpeechSynthesisUtterance(testo);
-            coachVoice.lang = 'it-IT';
-            
-            // Cerchiamo una voce maschile profonda nel sistema
-            const voci = window.speechSynthesis.getVoices();
-            const voceMaschile = voci.find(v => v.lang.includes('IT') && (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('male')));
-            if (voceMaschile) coachVoice.voice = voceMaschile;
-            
-            coachVoice.rate = 1.0;  // Velocità naturale e ferma
-            coachVoice.pitch = 0.9; // Abbassiamo il tono per renderlo profondo e cattivo
-            
-            coachVoice.onend = () => regolaVolumeMusica(false); // Rialza il Phonk appena ha finito
-            window.speechSynthesis.speak(coachVoice);
-            
-            // Aggiorna il testo a schermo
-            const speechTextNode = document.getElementById('ai-speech-text');
-            if (speechTextNode) speechTextNode.innerText = `"${testo}"`;
+        // ---- MOVIMENTO DELLE SCHEDE TUTORIAL ----
+        function nextSlide(slideNumero) {
+            document.querySelectorAll('.tutorial-slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            document.getElementById('slide-' + slideNumero).classList.add('active');
         }
 
-        // 1. TUTORIAL DI PRIMO AVVIO
-        function avviaTutorialIniziale() {
-            // Blocchiamo lo schermo sopra le sezioni per il tutorial
-            document.getElementById('app-sections-container').style.pointerEvents = 'none';
-            document.getElementById('floating-toro-btn').style.pointerEvents = 'none';
-            
-            aiParla("Benvenuto su AI ToRØ. Questa è la tua nuova infrastruttura d'élite per distruggere le maledizioni e superare i tuoi limiti fisici. Nella scheda Allenamento trovi i tuoi workout personali e il player Phonk per darti la carica. Nella scheda Abbonamento puoi sbloccare la modalità Vision. Io sono il tuo Coach AI.");
-            
-            setTimeout(() => {
-                aiParla("Tutorial completato. Il sistema è sbloccato. Dimmi quando sei pronto alla sbarra, roccia.");
-                localStorage.setItem('toro_tutorial_fatto', 'true');
-                tutorialCompletato = true;
-                document.getElementById('app-sections-container').style.pointerEvents = 'auto';
-                document.getElementById('floating-toro-btn').style.pointerEvents = 'auto';
-            }, 18000); // Durata della spiegazione iniziale
+        function chiudiTutorial() {
+            document.getElementById('tutorial-overlay').style.display = 'none';
+            controllaServer(); // Controlla la connessione al backend appena chiudi il tutorial
         }
 
-        // 2. CHAT VOCALE CON IL TORO (FUORI ALLENAMENTO)
-        function attivaIAGenerale() {
-            if (!tutorialCompletato) return;
-            aiParla("Sono qui, roccia. Dimmi tutto. Vuoi modificare i parametri del server o andiamo a spaccare i bicipiti?");
-        }
-
-        // 3. AVVIO ALLENAMENTO REALE (NO TIMING FAKE)
-        async function avviaAllenamento(nomeEsercizio, targetReps, tempoRiposo) {
-            if (!tutorialCompletato) return;
-            
-            document.getElementById('app-sections-container').style.display = 'none';
-            document.getElementById('ai-assistant-modal').style.display = 'block';
-            document.getElementById('current-ex-title').innerText = nomeEsercizio;
-            ripetizioni = 0;
-            document.getElementById('rep-counter').innerText = ripetizioni;
-
-            // LA FOTOCAMERA SI ACCENDE SOLO SE SEI ABBONATO VIP
-            if (utenteAbbonato) {
-                document.getElementById('premium-camera-zone').style.display = 'block';
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                    document.getElementById('webcam').srcObject = stream;
-                    aiParla(`Scansione biometrica Premium attiva. Posiziona il telefono. Inizia i tuoi ${nomeEsercizio}. Ti sto guardando.`);
-                    
-                    // NOTA: Qui collegheremo l'API di visione artificiale reale. 
-                    // Rimuovo il contatore automatico stupido così non sale da solo!
-                    document.getElementById('ai-speech-text').innerText = "AI Vision in ascolto del movimento del corpo...";
-                    
-                } catch (err) {
-                    console.log("Errore hardware fotocamera:", err);
-                    aiParla("Errore fotocamera. Esegui la serie e usa i comandi vocali.");
-                }
-            } else {
-                // Se NON è abbonato, la fotocamera rimane spenta e nascosta
-                document.getElementById('premium-camera-zone').style.display = 'none';
-                aiParla(`Interfaccia Standard. Inizia i tuoi ${nomeEsercizio}. Conta a voce o premi sullo schermo quando finisci.`);
-            }
-        }
-
-        // 4. LOGICA DEL TIMER DI RIPOSO (I 60 SECONDI DI CALCOLO)
-        function avviaRiposo(secondi) {
-            aiParla(`Serie completata. Ottimo lavoro. Ora fermati e recupera per ${secondi} secondi.`);
-            document.getElementById('timer-display').style.display = 'block';
-            let tempoRimanente = secondi;
-            document.getElementById('timer-seconds').innerText = tempoRimanente;
-
-            clearInterval(timerRiposo);
-            timerRiposo = setInterval(() => {
-                tempoRimanente--;
-                document.getElementById('timer-seconds').innerText = tempoRimanente;
-                
-                if (tempoRimanente === 10) aiParla("Dieci secondi al riavvio del server. Torna in posizione.");
-                
-                if (tempoRimanente <= 0) {
-                    clearInterval(timerRiposo);
-                    document.getElementById('timer-display').style.display = 'none';
-                    aiParla("Tempo di riposo scaduto. Sei pronto per la prossima serie? Rispondimi o premi lo schermo.");
-                }
-            }, 1000);
-        }
-
-        // INTERRUZIONE E RESET HARDWARE
-        function chiudiAllenamento() {
-            clearInterval(timerRiposo);
-            if (document.getElementById('webcam').srcObject) {
-                document.getElementById('webcam').srcObject.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('ai-assistant-modal').style.display = 'none';
-            document.getElementById('app-sections-container').style.display = 'block';
-            window.speechSynthesis.cancel();
-            regolaVolumeMusica(false);
-        }
-
-        // NAVIGAZIONE TAB IN BASSO
-        function cambiaSezione(nomeSezione) {
-            if (!tutorialCompletato) return;
-            document.getElementById('section-allenamento').style.display = nomeSezione === 'allenamento' ? 'block' : 'none';
-            document.getElementById('section-abbonamento').style.display = nomeSezione === 'abbonamento' ? 'block' : 'none';
-            document.getElementById('floating-toro-btn').style.display = nomeSezione === 'allenamento' ? 'flex' : 'none';
-            
-            document.getElementById('nav-btn-allenamento').classList.toggle('active', nomeSezione === 'allenamento');
-            document.getElementById('nav-btn-abbonamento').classList.toggle('active', nomeSezione === 'abbonamento');
-        }
-
-        // STRIPE CHECKOUT INTEGRATO IERI
-        async function pagaAbbonamento() {
-            const statusDiv = document.getElementById('payment-status');
-            statusDiv.style.color = "#FFD700";
-            statusDiv.innerText = "Reindirizzamento su Stripe Checkout...";
+        // ---- CONTROLLO TIMEOUT DEL SERVER DI RENDER ----
+        async function controllaServer() {
+            const overlay = document.getElementById('error-overlay');
             try {
-                const res = await fetch(`${SERVER_URL}/create-checkout-session`, { method: 'POST' });
-                const data = await res.json();
-                if (data.url) {
-                    window.location.href = data.url;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi completi per svegliare Render
+
+                const res = await fetch(SERVER_URL + '/', { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (res.ok) { 
+                    overlay.style.display = 'none'; 
                 } else {
-                    statusDiv.style.color = "#FF5555";
-                    statusDiv.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER Finanziario.";
+                    overlay.style.display = 'block';
                 }
-            } catch (e) {
-                statusDiv.style.color = "#FF5555";
-                statusDiv.innerText = "CONNESIONE FALLITA CON STRIPE.";
+            } catch(e) { 
+                overlay.style.display = 'block'; 
             }
         }
 
-        // PLAYER AUDIO PHONK
-        const playlist = [
-            { titolo: "ToRØ Phonk Gym Beat 01", url: "https://soundhelix.com" },
-            { titolo: "Shinjuku Shadow Hardcore", url: "https://soundhelix.com" },
-            { titolo: "Gojo Overclock Bass", url: "https://soundhelix.com" }
-        ];
-        let tracciaAttuale = 0;
-        let musicaInRiproduzione = false;
+        // ---- FUNZIONE LOGICA DI PAGAMENTO STRIPE CHECKOUT ----
+        async function attivaAbbonamento() {
+            const overlay = document.getElementById('error-overlay');
+            try {
+                // Richiesta al backend di Render per creare la sessione di pagamento
+                const response = await fetch(SERVER_URL + '/create-checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
 
-        function toggleMusica() {
-            const audio = document.getElementById('gym-audio');
-            const btn = document.getElementById('play-music-btn');
-            const status = document.getElementById('track-status');
-            const icon = document.querySelector('.music-icon');
+                const session = await response.json();
 
-            if (!musicaInRiproduzione) {
-                audio.play(); btn.innerText = "⏸"; status.innerText = "In riproduzione";
-                status.style.color = "#66FCF1"; icon.style.animation = "musicPulse 1.2s infinite";
-                musicaInRiproduzione = true;
-            } else {
-                audio.pause(); btn.innerText = "▶"; status.innerText = "In pausa";
-                                status.style.color = "#777E90"; 
-                icon.style.animation = "none";
-                musicaInRiproduzione = false;
+                if (session.id) {
+                    // Reindirizzamento allo Stripe Checkout ufficiale
+                    window.location.href = "https://stripe.com" + session.id;
+                } else {
+                    overlay.style.display = 'block';
+                }
+            } catch (error) {
+                overlay.style.display = 'block';
             }
-        }
-        
-        function nextTraccia() { 
-            tracciaAttuale = (tracciaAttuale + 1) % playlist.length; 
-            cambiaBrano(); 
-        }
-        
-        function prevTraccia() { 
-            tracciaAttuale = (tracciaAttuale - 1 + playlist.length) % playlist.length; 
-            cambiaBrano(); 
-        }
-        
-        function cambiaBrano() {
-            const audio = document.getElementById('gym-audio');
-            audio.src = playlist[tracciaAttuale].url;
-            document.getElementById('track-title').innerText = playlist[tracciaAttuale].titolo;
-            if (musicaInRiproduzione) audio.play();
-        }
-        
-        function regolaVolumeMusica(basso) {
-            const audio = document.getElementById('gym-audio');
-            if (audio) audio.volume = basso ? 0.10 : 1.0;
         }
     </script>
 </body>
 </html>
-
-
-
-    </script>
-</body>
-</html>
-
