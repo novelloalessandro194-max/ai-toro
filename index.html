@@ -16,6 +16,44 @@
         #payment-status { text-align: center; margin-top: 30px; color: #ffcc00; font-size: 12px; line-height: 1.4; font-weight: bold; }
         #error-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
         #error-overlay p { color: #FF0055; font-size: 13px; margin-bottom: 25px; line-height: 1.5; font-weight: bold; letter-spacing: 1px; }
+        .exercise-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.exercise-card:hover {
+    border-color: #66FCF1;
+    background: #1a1a1a;
+}
+.ex-info h3 { margin: 0; color: #fff; font-size: 16px; text-align: left; }
+.ex-info p { margin: 5px 0 0 0; color: #aaa; font-size: 12px; text-align: left; }
+.play-btn { color: #66FCF1; font-size: 14px; font-weight: bold; }
+
+#premium-camera-zone {
+    width: 100%;
+    height: 220px;
+    background: #111;
+    border: 2px dashed #FFD700;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 15px 0;
+    position: relative;
+}
+#webcam { width: 100%; height: 100%; object-fit: cover; }
+.ai-status-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.8); color: #FFD700;
+    padding: 5px 10px; font-size: 10px; border-radius: 20px; font-weight: bold;
+}
+.pulse-ring { font-size: 40px; margin: 15px auto; }
+#rep-counter { font-size: 80px; color: #66FCF1; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -27,6 +65,48 @@
     </div>
     
     <div id="content">
+        <!-- MENU ESERCIZI STILE LIFTOFF -->
+<div id="workout-menu">
+    <h2 style="color: #66FCF1; font-size: 18px; margin-bottom: 15px;">Allenamento di oggi</h2>
+    
+    <div class="exercise-card" onclick="avviaAllenamento('Push-up (Flessioni)', 10, 60)">
+        <div class="ex-info">
+            <h3>Push-up (Flessioni)</h3>
+            <p>Target: Petto e Tricipiti • 4 Serie</p>
+        </div>
+        <span class="play-btn">▶ Inizia</span>
+    </div>
+
+    <div class="exercise-card" onclick="avviaAllenamento('Trazioni alla sbarra', 8, 60)">
+        <div class="ex-info">
+            <h3>Trazioni alla sbarra</h3>
+            <p>Target: Dorso e Bicipiti • 4 Serie</p>
+        </div>
+        <span class="play-btn">▶ Inizia</span>
+    </div>
+</div>
+
+<!-- INTERFACCIA ASSISTENTE AI VOCALE / TELECAMERA -->
+<div id="ai-assistant-modal" style="display: none;">
+    <h2 id="current-ex-title" style="color: #fff;">Esercizio</h2>
+    
+    <!-- Sezione Premium: Telecamera VIP -->
+    <div id="premium-camera-zone" style="display: none;">
+        <video id="webcam" autoplay playsinline></video>
+        <div class="ai-status-badge">AI Vision: Attiva</div>
+    </div>
+
+    <!-- Pannello di Controllo Vocale dell'IA -->
+    <div class="ai-voice-panel">
+        <div class="pulse-ring">🎙️</div>
+        <p id="ai-speech-text" style="color: #aaa; font-size: 14px;">"Pronto a spaccare? Dimmi quando inizi."</p>
+        <h1 id="rep-counter">0</h1>
+        <div id="timer-display" style="display: none; color: #FFD700; font-size: 20px;">Riposo: <span id="timer-seconds">60</span>s</div>
+    </div>
+
+    <button class="btn-premium" onclick="chiudiAllenamento()" style="background: #FF5555; margin-top: 20px;">Interrompi</button>
+</div>
+
         <!-- Schermata di blocco se il server è offline -->
         <div id="error-overlay">
             <p>CONNESSIONE AL SERVER ASSENTE.<br>RIPROVA TRA QUALCHE ISTANTE.</p>
@@ -40,6 +120,92 @@
 </div>
 
 <script>
+    
+let ripetizioni = 0;
+let timerRiposo;
+
+// Questa funzione fa parlare il telefono con una voce da Coach
+function aiParla(testo) {
+    const textToSpeech = new SpeechSynthesisUtterance(testo);
+    textToSpeech.lang = 'it-IT';
+    textToSpeech.rate = 1.1; 
+    window.speechSynthesis.speak(textToSpeech);
+    document.getElementById('ai-speech-text').innerText = `"${testo}"`;
+}
+
+async function avviaAllenamento(nomeEsercizio, targetReps, tempoRiposo) {
+    document.getElementById('workout-menu').style.display = 'none';
+    document.getElementById('ai-assistant-modal').style.display = 'block';
+    document.getElementById('current-ex-title').innerText = nomeEsercizio;
+    ripetizioni = 0;
+    document.getElementById('rep-counter').innerText = ripetizioni;
+
+    // Se l'utente è abbonato sblocchiamo la telecamera frontale VIP
+    let utenteAbbonato = true; 
+
+    if (utenteAbbonato) {
+        document.getElementById('premium-camera-zone').style.display = 'block';
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            document.getElementById('webcam').srcObject = stream;
+            aiParla(`Scansione biometrica attiva. Inizia i tuoi ${nomeEsercizio}. Ti sto controllando.`);
+        } catch (err) {
+            console.log("Errore fotocamera:", err);
+            aiParla(`Inizia i tuoi ${nomeEsercizio}.`);
+        }
+    } else {
+        aiParla(`Inizia i tuoi ${nomeEsercizio}. Ti conto le ripetizioni.`);
+    }
+
+    // Conta una ripetizione simulata ogni 3 secondi
+    let interval = setInterval(() => {
+        if (ripetizioni < targetReps) {
+            ripetizioni++;
+            document.getElementById('rep-counter').innerText = ripetizioni;
+            
+            if (ripetizioni === 3) aiParla("Scendi bene con il petto, ottima esecuzione.");
+            else if (ripetizioni === 6) aiParla("Forza roccia, non mollare adesso!");
+            else aiParla(ripetizioni.toString());
+        } else {
+            clearInterval(interval);
+            avviaRiposo(tempoRiposo);
+        }
+    }, 3000); 
+}
+
+function avviaRiposo(secondi) {
+    aiParla(`Serie completata! Ottimo lavoro. Ora riposati per ${secondi} secondi.`);
+    document.getElementById('timer-display').style.display = 'block';
+    let tempoRimanente = secondi;
+    document.getElementById('timer-seconds').innerText = tempoRimanente;
+
+    timerRiposo = setInterval(() => {
+        tempoRimanente--;
+        document.getElementById('timer-seconds').innerText = tempoRimanente;
+        
+        if (tempoRimanente === 10) {
+            aiParla("Mancano dieci secondi. Preparati.");
+        }
+        
+        if (tempoRimanente <= 0) {
+            clearInterval(timerRiposo);
+            document.getElementById('timer-display').style.display = 'none';
+            aiParla("Tempo scaduto. Sei pronto per la prossima serie?");
+        }
+    }, 1000);
+}
+
+function chiudiAllenamento() {
+    clearInterval(timerRiposo);
+    if (document.getElementById('webcam').srcObject) {
+        document.getElementById('webcam').srcObject.getTracks().forEach(track => track.stop());
+    }
+    document.getElementById('ai-assistant-modal').style.display = 'none';
+    document.getElementById('workout-menu').style.display = 'block';
+    window.speechSynthesis.cancel();
+}
+
+
     const SERVER_URL = 'https://ai-toro.onrender.com';
 
     async function controllaServer() {
