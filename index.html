@@ -61,7 +61,7 @@
         const statusText = document.getElementById('payment-status');
         statusText.innerText = "REINDIRIZZAMENTO VERSO STRIPE...";
         try {
-            const res = await fetch(`${SERVER_URL}/api/monetizzazione/checkout`, { method: 'POST' });
+            const res = await fetch(`${SERVER_URL}/create-checkout-session`, { method: 'POST' });
             const data = await res.json();
             if(data.url) { window.location.href = data.url; } 
             else { statusText.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER."; }
