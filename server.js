@@ -63,7 +63,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_method_types: ['card'],
             line_items: [
                 {
-                    price: 'prod_V7PRiVXR6ylpyM', // Il tuo ID prodotto di Stripe
+                    price: 'price_1U7B1OJ1WKMqawcdP0vAcYgD',
                     quantity: 1,
                 },
             ],
