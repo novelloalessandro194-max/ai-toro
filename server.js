@@ -56,6 +56,27 @@ app.post('/api/community/invia', async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+// ROTTA PER CREARE LA SESSIONE DI ABBONAMENTO STRIPE
+app.post('/create-checkout-session', async (req, res) => {
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price: 'prod_V7PRiVXR6ylpyM', // Il tuo ID prodotto di Stripe
+                    quantity: 1,
+                },
+            ],
+            mode: 'subscription',
+            success_url: 'https://github.io',
+            cancel_url: 'https://github.io',
+        });
+
+        res.json({ id: session.id, url: session.url });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
 
 app.listen(PORT, () => {
     console.log(`Server in esecuzione sulla porta ${PORT}`);
