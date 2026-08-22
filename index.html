@@ -241,98 +241,127 @@
     </div>
 
     <script>
-        // BACKEND RENDER SERVER URL
+                // CONFIGURAZIONE SERVER E UTENTE
         const SERVER_URL = 'https://onrender.com';
+        let utenteAbbonato = true; // Riconosce che tu sei il King abbonato e attiva la fotocamera
         
         let ripetizioni = 0;
         let timerRiposo;
-        let utenteAbbonato = true; // Impostato su true per attivare subito la fotocamera frontale VIP sul tuo telefono
+        let tutorialCompletato = false;
 
-        // FUNZIONE PER CAMBIARE LE SCHEDE IN BASSO (TAB NAV)
-        function cambiaSezione(nomeSezione) {
-            document.getElementById('section-allenamento').style.display = nomeSezione === 'allenamento' ? 'block' : 'none';
-            document.getElementById('section-abbonamento').style.display = nomeSezione === 'abbonamento' ? 'block' : 'none';
-            document.getElementById('floating-toro-btn').style.display = nomeSezione === 'allenamento' ? 'flex' : 'none';
-            
-            document.getElementById('nav-btn-allenamento').classList.toggle('active', nomeSezione === 'allenamento');
-            document.getElementById('nav-btn-abbonamento').classList.toggle('active', nomeSezione === 'abbonamento');
-        }
+        // CONTROLLO AVVIO: PARTE IL TUTORIAL OBBLIGATORIO
+        window.onload = function() {
+            // Controlliamo se l'utente ha già fatto il tutorial in passato
+            if (!localStorage.getItem('toro_tutorial_fatto')) {
+                avviaTutorialIniziale();
+            } else {
+                tutorialCompletato = true;
+                aiParla("Benvenuto su AI ToRØ. Il server è online. Seleziona il tuo allenamento.");
+            }
+        };
 
-        // CHAT VOCALE GENERALE COL TORO FUORI ALLENAMENTO
-        function attivaIAGenerale() {
-            aiParla("Ciao roccia! Sono l'IA di ToRØ. Come posso aiutarti oggi? Vuoi spaccare la sbarra o configuriamo un nuovo circuito per gli addominali?");
-        }
-
-        // MOTORE DI SINTESI VOCALE CON CONTROLLO AUDIO MUSICA
+        // INTERFACCIA VOCALE COREOGRAFATA - VOCE DA COACH MASCHILE
         function aiParla(testo) {
-            regolaVolumeMusica(true); // Abbassa il Phonk
-            const textToSpeech = new SpeechSynthesisUtterance(testo);
-            textToSpeech.lang = 'it-IT';
-            textToSpeech.rate = 1.1; // Voce da Coach motivata
-            textToSpeech.onend = () => regolaVolumeMusica(false); // Rialza il Phonk appena ha finito di parlare
-            window.speechSynthesis.speak(textToSpeech);
-            document.getElementById('ai-speech-text').innerText = `"${testo}"`;
+            regolaVolumeMusica(true); // Abbassa la musica di sottofondo
+            
+            const coachVoice = new SpeechSynthesisUtterance(testo);
+            coachVoice.lang = 'it-IT';
+            
+            // Cerchiamo una voce maschile profonda nel sistema
+            const voci = window.speechSynthesis.getVoices();
+            const voceMaschile = voci.find(v => v.lang.includes('IT') && (v.name.toLowerCase().includes('google') || v.name.toLowerCase().includes('male')));
+            if (voceMaschile) coachVoice.voice = voceMaschile;
+            
+            coachVoice.rate = 1.0;  // Velocità naturale e ferma
+            coachVoice.pitch = 0.9; // Abbassiamo il tono per renderlo profondo e cattivo
+            
+            coachVoice.onend = () => regolaVolumeMusica(false); // Rialza il Phonk appena ha finito
+            window.speechSynthesis.speak(coachVoice);
+            
+            // Aggiorna il testo a schermo
+            const speechTextNode = document.getElementById('ai-speech-text');
+            if (speechTextNode) speechTextNode.innerText = `"${testo}"`;
         }
 
-        // APERTURA INTERFACCIA ASSISTENTE E AVVIO WORKOUT
+        // 1. TUTORIAL DI PRIMO AVVIO
+        function avviaTutorialIniziale() {
+            // Blocchiamo lo schermo sopra le sezioni per il tutorial
+            document.getElementById('app-sections-container').style.pointerEvents = 'none';
+            document.getElementById('floating-toro-btn').style.pointerEvents = 'none';
+            
+            aiParla("Benvenuto su AI ToRØ. Questa è la tua nuova infrastruttura d'élite per distruggere le maledizioni e superare i tuoi limiti fisici. Nella scheda Allenamento trovi i tuoi workout personali e il player Phonk per darti la carica. Nella scheda Abbonamento puoi sbloccare la modalità Vision. Io sono il tuo Coach AI.");
+            
+            setTimeout(() => {
+                aiParla("Tutorial completato. Il sistema è sbloccato. Dimmi quando sei pronto alla sbarra, roccia.");
+                localStorage.setItem('toro_tutorial_fatto', 'true');
+                tutorialCompletato = true;
+                document.getElementById('app-sections-container').style.pointerEvents = 'auto';
+                document.getElementById('floating-toro-btn').style.pointerEvents = 'auto';
+            }, 18000); // Durata della spiegazione iniziale
+        }
+
+        // 2. CHAT VOCALE CON IL TORO (FUORI ALLENAMENTO)
+        function attivaIAGenerale() {
+            if (!tutorialCompletato) return;
+            aiParla("Sono qui, roccia. Dimmi tutto. Vuoi modificare i parametri del server o andiamo a spaccare i bicipiti?");
+        }
+
+        // 3. AVVIO ALLENAMENTO REALE (NO TIMING FAKE)
         async function avviaAllenamento(nomeEsercizio, targetReps, tempoRiposo) {
+            if (!tutorialCompletato) return;
+            
             document.getElementById('app-sections-container').style.display = 'none';
             document.getElementById('ai-assistant-modal').style.display = 'block';
             document.getElementById('current-ex-title').innerText = nomeEsercizio;
             ripetizioni = 0;
             document.getElementById('rep-counter').innerText = ripetizioni;
 
+            // LA FOTOCAMERA SI ACCENDE SOLO SE SEI ABBONATO VIP
             if (utenteAbbonato) {
                 document.getElementById('premium-camera-zone').style.display = 'block';
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                     document.getElementById('webcam').srcObject = stream;
-                    aiParla(`Scansione biometrica attiva. Inizia i tuoi ${nomeEsercizio}. Ti sto controllando.`);
+                    aiParla(`Scansione biometrica Premium attiva. Posiziona il telefono. Inizia i tuoi ${nomeEsercizio}. Ti sto guardando.`);
+                    
+                    // NOTA: Qui collegheremo l'API di visione artificiale reale. 
+                    // Rimuovo il contatore automatico stupido così non sale da solo!
+                    document.getElementById('ai-speech-text').innerText = "AI Vision in ascolto del movimento del corpo...";
+                    
                 } catch (err) {
-                    console.log("Errore fotocamera:", err);
-                    aiParla(`Inizia i tuoi ${nomeEsercizio}.`);
+                    console.log("Errore hardware fotocamera:", err);
+                    aiParla("Errore fotocamera. Esegui la serie e usa i comandi vocali.");
                 }
             } else {
-                aiParla(`Inizia i tuoi ${nomeEsercizio}. Ti conto le ripetizioni.`);
+                // Se NON è abbonato, la fotocamera rimane spenta e nascosta
+                document.getElementById('premium-camera-zone').style.display = 'none';
+                aiParla(`Interfaccia Standard. Inizia i tuoi ${nomeEsercizio}. Conta a voce o premi sullo schermo quando finisci.`);
             }
-
-            let interval = setInterval(() => {
-                if (ripetizioni < targetReps) {
-                    ripetizioni++;
-                    document.getElementById('rep-counter').innerText = ripetizioni;
-                    
-                    if (ripetizioni === 3 && utenteAbbonato) aiParla("Scendi bene con il petto, esecuzione d'élite.");
-                    else if (ripetizioni === 6) aiParla("Forza roccia, non mollare adesso!");
-                    else aiParla(ripetizioni.toString());
-                } else {
-                    clearInterval(interval);
-                    avviaRiposo(tempoRiposo);
-                }
-            }, 3000); 
         }
 
-        // LOGICA DEL TIMER DI RIPOSO (IL CONTROLLO DEI 60 SECONDI)
+        // 4. LOGICA DEL TIMER DI RIPOSO (I 60 SECONDI DI CALCOLO)
         function avviaRiposo(secondi) {
-            aiParla(`Serie completata! Ottimo lavoro. Ora riposati per ${secondi} secondi.`);
+            aiParla(`Serie completata. Ottimo lavoro. Ora fermati e recupera per ${secondi} secondi.`);
             document.getElementById('timer-display').style.display = 'block';
             let tempoRimanente = secondi;
             document.getElementById('timer-seconds').innerText = tempoRimanente;
 
+            clearInterval(timerRiposo);
             timerRiposo = setInterval(() => {
                 tempoRimanente--;
                 document.getElementById('timer-seconds').innerText = tempoRimanente;
                 
-                if (tempoRimanente === 10) aiParla("Mancano dieci secondi. Preparati.");
+                if (tempoRimanente === 10) aiParla("Dieci secondi al riavvio del server. Torna in posizione.");
                 
                 if (tempoRimanente <= 0) {
                     clearInterval(timerRiposo);
                     document.getElementById('timer-display').style.display = 'none';
-                    aiParla("Tempo scaduto. Sei pronto per la prossima serie? Spingi forte.");
+                    aiParla("Tempo di riposo scaduto. Sei pronto per la prossima serie? Rispondimi o premi lo schermo.");
                 }
             }, 1000);
         }
 
-        // CHIUSURA MODALE ASSISTENTE E SPEGNIMENTO WEBCAM
+        // INTERRUZIONE E RESET HARDWARE
         function chiudiAllenamento() {
             clearInterval(timerRiposo);
             if (document.getElementById('webcam').srcObject) {
@@ -344,11 +373,22 @@
             regolaVolumeMusica(false);
         }
 
-        // CHIAMATA AL PAGAMENTO STRIPE SVILUPPATA IERI
+        // NAVIGAZIONE TAB IN BASSO
+        function cambiaSezione(nomeSezione) {
+            if (!tutorialCompletato) return;
+            document.getElementById('section-allenamento').style.display = nomeSezione === 'allenamento' ? 'block' : 'none';
+            document.getElementById('section-abbonamento').style.display = nomeSezione === 'abbonamento' ? 'block' : 'none';
+            document.getElementById('floating-toro-btn').style.display = nomeSezione === 'allenamento' ? 'flex' : 'none';
+            
+            document.getElementById('nav-btn-allenamento').classList.toggle('active', nomeSezione === 'allenamento');
+            document.getElementById('nav-btn-abbonamento').classList.toggle('active', nomeSezione === 'abbonamento');
+        }
+
+        // STRIPE CHECKOUT INTEGRATO IERI
         async function pagaAbbonamento() {
             const statusDiv = document.getElementById('payment-status');
             statusDiv.style.color = "#FFD700";
-            statusDiv.innerText = "Chiamata al server finanziario in corso...";
+            statusDiv.innerText = "Reindirizzamento su Stripe Checkout...";
             try {
                 const res = await fetch(`${SERVER_URL}/create-checkout-session`, { method: 'POST' });
                 const data = await res.json();
@@ -356,15 +396,15 @@
                     window.location.href = data.url;
                 } else {
                     statusDiv.style.color = "#FF5555";
-                    statusDiv.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER.";
+                    statusDiv.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER Finanziario.";
                 }
             } catch (e) {
                 statusDiv.style.color = "#FF5555";
-                statusDiv.innerText = "ERRORE DI CONFIGURAZIONE DEL SERVER.";
+                statusDiv.innerText = "CONNESIONE FALLITA CON STRIPE.";
             }
         }
 
-        // MANAGEMENT PLAYLIST WORKOUT PHONK BEATS
+        // PLAYER AUDIO PHONK
         const playlist = [
             { titolo: "ToRØ Phonk Gym Beat 01", url: "https://soundhelix.com" },
             { titolo: "Shinjuku Shadow Hardcore", url: "https://soundhelix.com" },
@@ -385,22 +425,39 @@
                 musicaInRiproduzione = true;
             } else {
                 audio.pause(); btn.innerText = "▶"; status.innerText = "In pausa";
-                status.style.color = "#777E90"; icon.style.animation = "none";
+                                status.style.color = "#777E90"; 
+                icon.style.animation = "none";
                 musicaInRiproduzione = false;
             }
         }
-        function nextTraccia() { tracciaAttuale = (tracciaAttuale + 1) % playlist.length; cambiaBrano(); }
-        function prevTraccia() { tracciaAttuale = (tracciaAttuale - 1 + playlist.length) % playlist.length; cambiaBrano(); }
+        
+        function nextTraccia() { 
+            tracciaAttuale = (tracciaAttuale + 1) % playlist.length; 
+            cambiaBrano(); 
+        }
+        
+        function prevTraccia() { 
+            tracciaAttuale = (tracciaAttuale - 1 + playlist.length) % playlist.length; 
+            cambiaBrano(); 
+        }
+        
         function cambiaBrano() {
             const audio = document.getElementById('gym-audio');
             audio.src = playlist[tracciaAttuale].url;
             document.getElementById('track-title').innerText = playlist[tracciaAttuale].titolo;
             if (musicaInRiproduzione) audio.play();
         }
+        
         function regolaVolumeMusica(basso) {
             const audio = document.getElementById('gym-audio');
-            if (audio) audio.volume = basso ? 0.15 : 1.0;
+            if (audio) audio.volume = basso ? 0.10 : 1.0;
         }
+    </script>
+</body>
+</html>
+
+
+
     </script>
 </body>
 </html>
