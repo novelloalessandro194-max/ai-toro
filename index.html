@@ -6,232 +6,253 @@
     <title>AI ToRØ - Official App</title>
     
     <style>
-        /* --- GRAFICA CYBERPUNK GENERALE --- */
+        /* --- STILE GENERALE CYBERPUNK --- */
         body {
-            background-color: #0a0a0a;
+            background-color: #050505;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 20px;
             text-align: center;
+            overflow-x: hidden;
         }
 
         .container {
-            max-width: 500px;
-            margin: 40px auto;
+            max-width: 450px;
+            margin: 30px auto;
             background: #111111;
-            padding: 30px;
-            border-radius: 12px;
+            padding: 25px;
+            border-radius: 16px;
             border: 1px solid #222222;
-            box-shadow: 0px 0px 20px rgba(0, 210, 255, 0.1);
+            box-shadow: 0px 0px 25px rgba(0, 210, 255, 0.08);
         }
 
-        h1 {
-            color: #00d2ff;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
+        h1 { color: #00d2ff; font-size: 28px; margin-bottom: 5px; text-transform: uppercase; }
+        p.subtitle { color: #888888; font-size: 13px; margin-bottom: 25px; }
 
-        p.subtitle {
-            color: #aaaaaa;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
-
-        /* --- BLOCCO ABBONAMENTO PRINCIPALE --- */
+        /* --- BLOCCO ABBONAMENTO STRIPE --- */
         .subscription-card {
             border: 2px solid #ffcc00;
-            background: #1a1a00;
+            background: #1e1a05;
             padding: 25px;
-            border-radius: 10px;
-            margin-top: 20px;
-            box-shadow: 0px 0px 15px rgba(255, 204, 0, 0.2);
+            border-radius: 14px;
+            margin-top: 10px;
+            box-shadow: 0px 0px 15px rgba(255, 204, 0, 0.15);
         }
-
-        .price {
-            font-size: 32px;
-            font-weight: bold;
-            color: #ffcc00;
-            margin: 15px 0;
-        }
-
+        .price { font-size: 34px; font-weight: bold; color: #ffcc00; margin: 15px 0; }
         .btn-pay {
-            background-color: #ffcc00;
-            color: #000000;
-            border: none;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s;
+            background-color: #ffcc00; color: #000000; border: none;
+            padding: 16px; font-size: 18px; font-weight: bold;
+            border-radius: 8px; cursor: pointer; width: 100%;
         }
+        .error-message { color: #ff3333; font-size: 13px; margin-top: 15px; font-weight: bold; display: none; }
 
-        .btn-pay:hover {
-            transform: scale(1.02);
-        }
-
-        .error-message {
-            color: #ff3333;
-            font-size: 13px;
-            margin-top: 15px;
-            font-weight: bold;
-            display: none; /* Gestito via JS */
-        }
-
-        /* --- OVERLAY TUTORIAL INIZIALE (ONBOARDING) --- */
+        /* --- CONTENITORE TUTORIAL INTERATTIVO (STILE LIFTOFF) --- */
         .tutorial-container {
             position: fixed;
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%;
-            background: #0a0a0a;
-            z-index: 9999; /* Copre l'app all'avvio */
-            display: flex; 
-            justify-content: center; 
-            align-items: center;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #0d0e12;
+            z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: space-between; box-sizing: border-box;
+            padding: 30px 20px;
         }
 
-        .tutorial-slide {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            max-width: 80%;
+        /* BARRA DI PROGRESSIONE IN ALTO */
+        .progress-bar-container {
+            width: 100%; height: 6px; background: #222530;
+            border-radius: 3px; overflow: hidden; margin-bottom: 20px;
+        }
+        .progress-bar-fill {
+            width: 14%; height: 100%; background: #00d2ff;
+            box-shadow: 0px 0px 8px #00d2ff; transition: width 0.3s ease;
         }
 
-        .tutorial-slide.active {
-            display: block;
+        .tutorial-slide { display: none; width: 100%; max-width: 400px; margin: auto; }
+        .tutorial-slide.active { display: flex; flex-direction: column; align-items: center; }
+
+        /* MASCOTTE DELLO SCHERMO: ANCUBU IL MINOTAURO */
+        .mascotte-box { font-size: 65px; margin-bottom: 5px; animation: float 2s ease-in-out infinite; }
+        .mascotte-name { color: #00d2ff; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        @keyframes float { 
+            0%, 100% { transform: translateY(0); } 
+            50% { transform: translateY(-8px); } 
         }
 
-        .tutorial-slide h2 { 
-            color: #00d2ff; 
-            font-size: 26px; 
-            margin-bottom: 15px; 
+        /* BALLOON DEL TESTO */
+        .speech-bubble {
+            background: #1c1e24; border-radius: 16px; padding: 15px 20px;
+            font-size: 15px; color: #ffffff; line-height: 1.4;
+            margin-bottom: 30px; position: relative; border: 1px solid #2d313d;
+            width: 90%;
         }
 
-        .tutorial-slide p { 
-            color: #ffffff; 
-            font-size: 16px; 
-            margin-bottom: 35px; 
-            line-height: 1.5; 
-        }
+        .slide-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: left; width: 100%; }
 
-        .tutorial-slide button {
-            background: #00d2ff; 
-            color: #000000; 
-            border: none;
-            padding: 14px 35px; 
-            font-weight: bold; 
-            font-size: 16px;
-            border-radius: 6px; 
-            cursor: pointer;
+        /* CAMPI DI INPUT E OPZIONI MULTIPLE */
+        .input-field {
+            width: 100%; padding: 16px; background: #1c1e24;
+            border: 1px solid #2d313d; border-radius: 12px;
+            color: #ffffff; font-size: 16px; box-sizing: border-box;
+        }
+        .input-field:focus { border-color: #00d2ff; outline: none; }
+
+        .option-button {
+            width: 100%; padding: 16px; background: #1c1e24;
+            border: 1px solid #2d313d; border-radius: 12px;
+            color: #ffffff; font-size: 16px; text-align: left;
+            margin-bottom: 12px; cursor: pointer; display: flex; align-items: center;
+        }
+        .option-button.selected { border-color: #00d2ff; background: #1f2a3a; }
+        .option-icon { margin-right: 15px; font-size: 20px; }
+
+        /* TASTO AVANTI IN BASSO */
+        .btn-next {
+            background: #00d2ff; color: #000000; border: none;
+            padding: 16px; font-size: 18px; font-weight: bold;
+            border-radius: 12px; cursor: pointer; width: 100%; max-width: 400px;
+            margin: 0 auto; margin-top: auto;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. SCHEDE DEL TUTORIAL INIZIALE -->
+    <!-- INTERFACCIA ONBOARDING A STEPS -->
     <div id="tutorial-overlay" class="tutorial-container">
-        <!-- Scheda 1 -->
+        
+        <!-- BARRA DI AVANZAMENTO -->
+        <div class="progress-bar-container">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+        </div>
+
+        <!-- STEP 1: PRESENTAZIONE -->
         <div class="tutorial-slide active" id="slide-1">
-            <h2>Benvenuto su AI ToRØ 🦾</h2>
-            <p>L'intelligenza artificiale d'élite creata per ottimizzare la tua mente, il tuo fisico e il tuo business.</p>
-            <button onclick="nextSlide(2)">Avanti ➡️</button>
+            <div class="mascotte-box">🐂</div>
+            <div class="mascotte-name">Ancubu</div>
+            <div class="speech-bubble">Io sono Ancubu. Ti farò qualche domanda prima di sbloccare i moduli computazionali!</div>
+            <button class="btn-next" onclick="nextSlide(2, '28%')">VA BENE!</button>
         </div>
-        
-        <!-- Scheda 2 -->
+
+        <!-- STEP 2: INSERIMENTO NOME -->
         <div class="tutorial-slide" id="slide-2">
-            <h2>Potenza Computazionale ⚡</h2>
-            <p>Analisi di dati, codice e strategie in tempo reale direttamente sul tuo server dedicato di Render.</p>
-            <button onclick="nextSlide(3)">Avanti ➡️</button>
+            <div class="mascotte-box">🐂</div>
+            <div class="mascotte-name">Ancubu</div>
+            <div class="speech-bubble">Come dobbiamo registrarti nel database principale di AI ToRØ?</div>
+            <div class="slide-title">Come ti chiami?</div>
+            <input type="text" id="user-name-input" class="input-field" placeholder="Inserisci il tuo nome">
+            <p style="color:#666; font-size:13px; text-align:left; width:100%; margin-top:8px;">Puoi cambiarlo più tardi nel tuo profilo.</p>
+            <button class="btn-next" style="margin-top:40px;" onclick="salvaNomeAndAvanti()">AVANTI</button>
         </div>
-        
-        <!-- Scheda 3 -->
+
+        <!-- STEP 3: LIVELLO ALLENAMENTO -->
         <div class="tutorial-slide" id="slide-3">
-            <h2>Sblocca il Potere Assoluto 👑</h2>
-            <p>Attiva l'abbonamento tramite Stripe Sandbox ed entra nel server privato per formattare ogni bug della tua realtà.</p>
-            <button onclick="chiudiTutorial()">Entra nell'App 🔥</button>
+            <div class="mascotte-box">🐂</div>
+            <div class="mascotte-name">Ancubu</div>
+            <div class="speech-bubble">Benvenuto nel server, <span id="display-name">Ale</span>. Quanta esperienza hai di allenamento alla sbarra?</div>
+            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📊</span> Non mi sono mai allenato</button>
+            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📉</span> Principiante - Ho già provato</button>
+            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📈</span> Intermedio - Allenamento regolare</button>
+            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">⚡</span> Avanzato - Anni di esperienza d'élite</button>
+        </div>
+
+        <!-- STEP 4: OBIETTIVO PRINCIPALE -->
+        <div class="tutorial-slide" id="slide-4">
+            <div class="mascotte-box">🐂</div>
+            <div class="mascotte-name">Ancubu</div>
+            <div class="speech-bubble">Qual è l'obiettivo principale che vuoi far calcolare ad AI ToRØ?</div>
+            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🍏</span> Perdere peso e mettermi in forma</button>
+            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🏋️‍♂️</span> Diventare più forte</button>
+            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">⭐</span> Ottenere i rank della struttura fisica</button>
+            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🥩</span> Sviluppare massa muscolare d'acciaio</button>
+            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🔥</span> Diventare più costante</button>
+        </div>
+
+        <!-- STEP 5: COMPILAZIONE COMPLETATA -->
+        <div class="tutorial-slide" id="slide-5">
+            <div class="mascotte-box">👑</div>
+            <div class="mascotte-name">Ancubu</div>
+            <div class="speech-bubble">Configurazione completata, Onorato. Il tuo profilo da 100 kg è caricato sul server.</div>
+            <div class="slide-title">Pronto all'Upgrade</div>
+            <button class="btn-next" style="margin-top:40px;" onclick="chiudiTutorial()">ENTRA NELL'APP 🔥</button>
         </div>
     </div>
 
-    <!-- 2. INTERFACCIA APP UFFICIALE -->
+    <!-- SCHERMATA APPLICAZIONE REALE CON ABBONAMENTO -->
     <div class="container">
         <h1>AI ToRØ</h1>
         <p class="subtitle">Console di Controllo Principale v1.0</p>
         
-        <!-- SEZIONE ABBONAMENTO STRIPE -->
         <div class="subscription-card">
-            <h2>ACCESSO LIVE SERVER</h2>
-            <p>Sblocca tutte le feature e i moduli computazionali avanzati dell'intelligenza artificiale.</p>
+            <h2 style="color: #ffcc00; font-size: 20px; margin-top:0;">ACCESSO LIVE SERVER</h2>
+            <p style="font-size:14px; color:#cccccc;">Sblocca tutte le feature computazionali e i moduli avanzati dell'intelligenza artificiale.</p>
             <div class="price">3,99 € <span style="font-size: 14px; color: #aaaaaa;">/ mese</span></div>
             <button class="btn-pay" onclick="attivaAbbonamento()">ATTIVA ABBONAMENTO 🔥</button>
             <div id="error-overlay" class="error-message">ERRORE DI CONNESSIONE. VERIFICA IL SERVER.</div>
         </div>
     </div>
 
-    <!-- 3. LOGICA JAVASCRIPT DI LOGICA ED EVOLUZIONE -->
     <script>
-        // CONFIGURAZIONE DELLE API (Modifica con i tuoi URL e chiavi reali)
-        const SERVER_URL = "https://IL_TUO_://onrender.com"; 
+        // Ricordati di incollare il tuo URL reale di Render e la tua chiave pk_test_ di Stripe qui sotto!
+        const SERVER_URL = "https://onrender.com"; 
         const STRIPE_PUBLIC_KEY = "pk_test_INSERISCI_QUI_LA_TUA_CHIAVE_DI_STRIPE";
 
-        // ---- MOVIMENTO DELLE SCHEDE TUTORIAL ----
-        function nextSlide(slideNumero) {
+        // GESTIONE DELLE SCHEDE INTERATTIVE E BARRA
+        function nextSlide(slideNumero, percentualeBarra) {
             document.querySelectorAll('.tutorial-slide').forEach(slide => {
                 slide.classList.remove('active');
             });
             document.getElementById('slide-' + slideNumero).classList.add('active');
+            if(percentualeBarra) {
+                document.getElementById('progress-fill').style.width = percentualeBarra;
+            }
+        }
+
+        function salvaNomeAndAvanti() {
+            let nomeInput = document.getElementById('user-name-input').value;
+            if(!nomeInput) nomeInput = "Ale";
+            document.getElementById('display-name').innerText = nomeInput;
+            nextSlide(3, '42%');
+        }
+
+        function selectOption(button, prossimoStep, percentualeBarra) {
+            button.classList.add('selected');
+            setTimeout(() => {
+                nextSlide(prossimoStep, percentualeBarra);
+            }, 250);
         }
 
         function chiudiTutorial() {
             document.getElementById('tutorial-overlay').style.display = 'none';
-            controllaServer(); // Controlla la connessione al backend appena chiudi il tutorial
+            controllaServer();
         }
 
-        // ---- CONTROLLO TIMEOUT DEL SERVER DI RENDER ----
+        // VERIFICA TIMEOUT SERVER RENDER (10 Secondi)
         async function controllaServer() {
             const overlay = document.getElementById('error-overlay');
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 secondi completi per svegliare Render
-
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
                 const res = await fetch(SERVER_URL + '/', { signal: controller.signal });
                 clearTimeout(timeoutId);
-                
-                if (res.ok) { 
-                    overlay.style.display = 'none'; 
-                } else {
-                    overlay.style.display = 'block';
-                }
-            } catch(e) { 
-                overlay.style.display = 'block'; 
-            }
+                if (res.ok) { overlay.style.display = 'none'; } else { overlay.style.display = 'block'; }
+            } catch(e) { overlay.style.display = 'block'; }
         }
 
-        // ---- FUNZIONE LOGICA DI PAGAMENTO STRIPE CHECKOUT ----
+        // APERTURA CHECKOUT STRIPE SANDBOX
         async function attivaAbbonamento() {
             const overlay = document.getElementById('error-overlay');
             try {
-                // Richiesta al backend di Render per creare la sessione di pagamento
                 const response = await fetch(SERVER_URL + '/create-checkout-session', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-
                 const session = await response.json();
-
                 if (session.id) {
-                    // Reindirizzamento allo Stripe Checkout ufficiale
                     window.location.href = "https://stripe.com" + session.id;
-                } else {
-                    overlay.style.display = 'block';
-                }
-            } catch (error) {
-                overlay.style.display = 'block';
-            }
+                } else { overlay.style.display = 'block'; }
+            } catch (error) { overlay.style.display = 'block'; }
         }
     </script>
 </body>
 </html>
+
