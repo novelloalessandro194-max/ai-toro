@@ -1,258 +1,99 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ToRØ - Official App</title>
+<!-- Schermata del Minigioco (Inizialmente nascosta) -->
+<div id="game-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#050505; font-family:sans-serif; z-index:9998; overflow:hidden; padding:20px; box-sizing:border-box;">
     
-    <style>
-        /* --- STILE GENERALE CYBERPUNK --- */
-        body {
-            background-color: #050505;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
-            overflow-x: hidden;
-        }
+    <!-- Testo Superiore Richiesto -->
+    <div style="text-align:center; margin-top:20px;">
+        <h2 style="color:#ff1e1e; font-size:24px; letter-spacing:3px; text-transform:uppercase; margin:0; font-weight:900;">Sconfiggi i mostri</h2>
+        <p id="game-subtitle" style="color:#666; font-size:12px; margin-top:5px; text-transform:uppercase; letter-spacing:1px;">Elimina le anomalie per sbloccare il menu</p>
+    </div>
 
-        .container {
-            max-width: 450px;
-            margin: 30px auto;
-            background: #111111;
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid #222222;
-            box-shadow: 0px 0px 25px rgba(0, 210, 255, 0.08);
-        }
-
-        h1 { color: #00d2ff; font-size: 28px; margin-bottom: 5px; text-transform: uppercase; }
-        p.subtitle { color: #888888; font-size: 13px; margin-bottom: 25px; }
-
-        /* --- BLOCCO ABBONAMENTO STRIPE --- */
-        .subscription-card {
-            border: 2px solid #ffcc00;
-            background: #1e1a05;
-            padding: 25px;
-            border-radius: 14px;
-            margin-top: 10px;
-            box-shadow: 0px 0px 15px rgba(255, 204, 0, 0.15);
-        }
-        .price { font-size: 34px; font-weight: bold; color: #ffcc00; margin: 15px 0; }
-        .btn-pay {
-            background-color: #ffcc00; color: #000000; border: none;
-            padding: 16px; font-size: 18px; font-weight: bold;
-            border-radius: 8px; cursor: pointer; width: 100%;
-        }
-        .error-message { color: #ff3333; font-size: 13px; margin-top: 15px; font-weight: bold; display: none; }
-
-        /* --- CONTENITORE TUTORIAL INTERATTIVO (STILE LIFTOFF) --- */
-        .tutorial-container {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0d0e12;
-            z-index: 9999;
-            display: flex; flex-direction: column;
-            justify-content: space-between; box-sizing: border-box;
-            padding: 30px 20px;
-        }
-
-        /* BARRA DI PROGRESSIONE IN ALTO */
-        .progress-bar-container {
-            width: 100%; height: 6px; background: #222530;
-            border-radius: 3px; overflow: hidden; margin-bottom: 20px;
-        }
-        .progress-bar-fill {
-            width: 14%; height: 100%; background: #00d2ff;
-            box-shadow: 0px 0px 8px #00d2ff; transition: width 0.3s ease;
-        }
-
-        .tutorial-slide { display: none; width: 100%; max-width: 400px; margin: auto; }
-        .tutorial-slide.active { display: flex; flex-direction: column; align-items: center; }
-
-        /* MASCOTTE DELLO SCHERMO: ANCUBU IL MINOTAURO */
-        .mascotte-box { font-size: 65px; margin-bottom: 5px; animation: float 2s ease-in-out infinite; }
-        .mascotte-name { color: #00d2ff; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
-        @keyframes float { 
-            0%, 100% { transform: translateY(0); } 
-            50% { transform: translateY(-8px); } 
-        }
-
-        /* BALLOON DEL TESTO */
-        .speech-bubble {
-            background: #1c1e24; border-radius: 16px; padding: 15px 20px;
-            font-size: 15px; color: #ffffff; line-height: 1.4;
-            margin-bottom: 30px; position: relative; border: 1px solid #2d313d;
-            width: 90%;
-        }
-
-        .slide-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: left; width: 100%; }
-
-        /* CAMPI DI INPUT E OPZIONI MULTIPLE */
-        .input-field {
-            width: 100%; padding: 16px; background: #1c1e24;
-            border: 1px solid #2d313d; border-radius: 12px;
-            color: #ffffff; font-size: 16px; box-sizing: border-box;
-        }
-        .input-field:focus { border-color: #00d2ff; outline: none; }
-
-        .option-button {
-            width: 100%; padding: 16px; background: #1c1e24;
-            border: 1px solid #2d313d; border-radius: 12px;
-            color: #ffffff; font-size: 16px; text-align: left;
-            margin-bottom: 12px; cursor: pointer; display: flex; align-items: center;
-        }
-        .option-button.selected { border-color: #00d2ff; background: #1f2a3a; }
-        .option-icon { margin-right: 15px; font-size: 20px; }
-
-        /* TASTO AVANTI IN BASSO */
-        .btn-next {
-            background: #00d2ff; color: #000000; border: none;
-            padding: 16px; font-size: 18px; font-weight: bold;
-            border-radius: 12px; cursor: pointer; width: 100%; max-width: 400px;
-            margin: 0 auto; margin-top: auto;
-        }
-    </style>
-</head>
-<body>
-
-    <!-- INTERFACCIA ONBOARDING A STEPS -->
-    <div id="tutorial-overlay" class="tutorial-container">
-        
-        <!-- BARRA DI AVANZAMENTO -->
-        <div class="progress-bar-container">
-            <div id="progress-fill" class="progress-bar-fill"></div>
+    <!-- Arena di Gioco Centrale -->
+    <div id="arena" style="width:100%; height:45%; margin:40px auto 0 auto; background:#0c0c0c; border:2px solid #222; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+        <!-- Mostro Attivo -->
+        <div id="monster-target" style="color:#ff1e1e; font-size:18px; font-weight:bold; letter-spacing:2px; border:1px solid #ff1e1e; padding:10px 20px; background:rgba(255,30,30,0.05); border-radius:4px; text-transform:uppercase; transition: all 0.2s;">
+            OMBRA: DUBBIO
         </div>
-
-        <!-- STEP 1: PRESENTAZIONE -->
-        <div class="tutorial-slide active" id="slide-1">
-            <div class="mascotte-box">🐂</div>
-            <div class="mascotte-name">Ancubu</div>
-            <div class="speech-bubble">Io sono Ancubu. Ti farò qualche domanda prima di sbloccare i moduli computazionali!</div>
-            <button class="btn-next" onclick="nextSlide(2, '28%')">VA BENE!</button>
-        </div>
-
-        <!-- STEP 2: INSERIMENTO NOME -->
-        <div class="tutorial-slide" id="slide-2">
-            <div class="mascotte-box">🐂</div>
-            <div class="mascotte-name">Ancubu</div>
-            <div class="speech-bubble">Come dobbiamo registrarti nel database principale di AI ToRØ?</div>
-            <div class="slide-title">Come ti chiami?</div>
-            <input type="text" id="user-name-input" class="input-field" placeholder="Inserisci il tuo nome">
-            <p style="color:#666; font-size:13px; text-align:left; width:100%; margin-top:8px;">Puoi cambiarlo più tardi nel tuo profilo.</p>
-            <button class="btn-next" style="margin-top:40px;" onclick="salvaNomeAndAvanti()">AVANTI</button>
-        </div>
-
-        <!-- STEP 3: LIVELLO ALLENAMENTO -->
-        <div class="tutorial-slide" id="slide-3">
-            <div class="mascotte-box">🐂</div>
-            <div class="mascotte-name">Ancubu</div>
-            <div class="speech-bubble">Benvenuto nel server, <span id="display-name">Ale</span>. Quanta esperienza hai di allenamento alla sbarra?</div>
-            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📊</span> Non mi sono mai allenato</button>
-            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📉</span> Principiante - Ho già provato</button>
-            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">📈</span> Intermedio - Allenamento regolare</button>
-            <button class="option-button" onclick="selectOption(this, 4, '57%')"><span class="option-icon">⚡</span> Avanzato - Anni di esperienza d'élite</button>
-        </div>
-
-        <!-- STEP 4: OBIETTIVO PRINCIPALE -->
-        <div class="tutorial-slide" id="slide-4">
-            <div class="mascotte-box">🐂</div>
-            <div class="mascotte-name">Ancubu</div>
-            <div class="speech-bubble">Qual è l'obiettivo principale che vuoi far calcolare ad AI ToRØ?</div>
-            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🍏</span> Perdere peso e mettermi in forma</button>
-            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🏋️‍♂️</span> Diventare più forte</button>
-            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">⭐</span> Ottenere i rank della struttura fisica</button>
-            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🥩</span> Sviluppare massa muscolare d'acciaio</button>
-            <button class="option-button" onclick="selectOption(this, 5, '85%')"><span class="option-icon">🔥</span> Diventare più costante</button>
-        </div>
-
-        <!-- STEP 5: COMPILAZIONE COMPLETATA -->
-        <div class="tutorial-slide" id="slide-5">
-            <div class="mascotte-box">👑</div>
-            <div class="mascotte-name">Ancubu</div>
-            <div class="speech-bubble">Configurazione completata, Onorato. Il tuo profilo da 100 kg è caricato sul server.</div>
-            <div class="slide-title">Pronto all'Upgrade</div>
-            <button class="btn-next" style="margin-top:40px;" onclick="chiudiTutorial()">ENTRA NELL'APP 🔥</button>
+        <!-- Indicatore HP del Mostro -->
+        <div style="width:60%; height:4px; background:#1a1a1a; margin-top:15px; border-radius:2px; overflow:hidden;">
+            <div id="monster-hp" style="width:100%; height:100%; background:#ff1e1e; transition: width 0.2s;"></div>
         </div>
     </div>
 
-    <!-- SCHERMATA APPLICAZIONE REALE CON ABBONAMENTO -->
-    <div class="container">
-        <h1>AI ToRØ</h1>
-        <p class="subtitle">Console di Controllo Principale v1.0</p>
+    <!-- Console dei Pulsanti Inferiore -->
+    <div style="position:absolute; bottom:40px; left:0; width:100%; padding:0 20px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;">
         
-        <div class="subscription-card">
-            <h2 style="color: #ffcc00; font-size: 20px; margin-top:0;">ACCESSO LIVE SERVER</h2>
-            <p style="font-size:14px; color:#cccccc;">Sblocca tutte le feature computazionali e i moduli avanzati dell'intelligenza artificiale.</p>
-            <div class="price">3,99 € <span style="font-size: 14px; color: #aaaaaa;">/ mese</span></div>
-            <button class="btn-pay" onclick="attivaAbbonamento()">ATTIVA ABBONAMENTO 🔥</button>
-            <div id="error-overlay" class="error-message">ERRORE DI CONNESSIONE. VERIFICA IL SERVER.</div>
+        <!-- Tasto Attacco Principale -->
+        <button onclick="handleAction('attacco')" style="background:#ff1e1e; color:#fff; border:none; padding:16px; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; border-radius:6px; cursor:pointer; box-shadow: 0 4px 10px rgba(255,30,30,0.3); transition: transform 0.1s;">
+            ATTACCO ⚔️
+        </button>
+        
+        <!-- Doppi Pulsanti Laterali (Difesa e Scatto) -->
+        <div style="display:flex; gap:12px;">
+            <button onclick="handleAction('difesa')" style="flex:1; background:#222; color:#aaa; border:1px solid #444; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer;">
+                DIFESA 🛡️
+            </button>
+            <button onclick="handleAction('scatto')" style="flex:1; background:#00d2ff; color:#000; border:none; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,210,255,0.2);">
+                SCATTO ⚡
+            </button>
         </div>
     </div>
+</div>
 
-    <script>
-        // Ricordati di incollare il tuo URL reale di Render e la tua chiave pk_test_ di Stripe qui sotto!
-        const SERVER_URL = "https://onrender.com"; 
-        const STRIPE_PUBLIC_KEY = "pk_test_51U6B2QJ1WKMqawcdOdKY6VaROODQ8wJilYgMHhCQYshZCZfsuJdgiak74Zp9814snQYFBcIQvMY7HKyksVrGHNxT00mKwO11tR";
+<script>
+let currentPhase = 'dubbio'; // Fasi: dubbio -> pigrizia -> porta
+let monsterHP = 100;
 
-        // GESTIONE DELLE SCHEDE INTERATTIVE E BARRA
-        function nextSlide(slideNumero, percentualeBarra) {
-            document.querySelectorAll('.tutorial-slide').forEach(slide => {
-                slide.classList.remove('active');
-            });
-            document.getElementById('slide-' + slideNumero).classList.add('active');
-            if(percentualeBarra) {
-                document.getElementById('progress-fill').style.width = percentualeBarra;
+function handleAction(type) {
+    const target = document.getElementById('monster-target');
+    const hpBar = document.getElementById('monster-hp');
+    const subtitle = document.getElementById('game-subtitle');
+    const arena = document.getElementById('arena');
+
+    // Effetto vibrazione visiva all'azione
+    arena.style.transform = `translate(${(Math.random()*4)-2}px, ${(Math.random()*4)-2}px)`;
+    setTimeout(() => arena.style.transform = 'none', 100);
+
+    if (currentPhase === 'dubbio' || currentPhase === 'pigrizia') {
+        if (type === 'attacco') {
+            monsterHP -= 34; // 3 colpi per uccidere il mostro
+            if (monsterHP < 0) monsterHP = 0;
+            hpBar.style.width = monsterHP + '%';
+
+            if (monsterHP <= 0) {
+                if (currentPhase === 'dubbio') {
+                    // Passa al secondo mostro
+                    currentPhase = 'pigrizia';
+                    monsterHP = 100;
+                    hpBar.style.width = '100%';
+                    target.innerHTML = "OMBRA: PIGRIZIA";
+                } else {
+                    // Entrambi i mostri sconfitti, compare la porta blindata
+                    currentPhase = 'porta';
+                    hpBar.parentElement.style.display = 'none';
+                    target.innerHTML = "PORTA BLINDATA CORE";
+                    target.style.color = "#00d2ff";
+                    target.style.borderColor = "#00d2ff";
+                    target.style.background = "rgba(0,210,255,0.05)";
+                    subtitle.innerHTML = "Usa lo scatto per distruggere la barriera";
+                }
             }
         }
-
-        function salvaNomeAndAvanti() {
-            let nomeInput = document.getElementById('user-name-input').value;
-            if(!nomeInput) nomeInput = "Ale";
-            document.getElementById('display-name').innerText = nomeInput;
-            nextSlide(3, '42%');
-        }
-
-        function selectOption(button, prossimoStep, percentualeBarra) {
-            button.classList.add('selected');
+    } else if (currentPhase === 'porta') {
+        if (type === 'scatto') {
+            // Animazione di sfondamento finale
+            arena.style.background = '#00d2ff';
+            target.innerHTML = "[PORTA DISTRUTTA]";
             setTimeout(() => {
-                nextSlide(prossimoStep, percentualeBarra);
-            }, 250);
+                document.getElementById('game-screen').style.display = 'none';
+                // Sblocca il menu principale dell'applicazione reale
+                alert("ACCESSO AL MENU PRINCIPALE AUTORIZZATO.");
+            }, 800);
         }
+    }
+}
 
-        function chiudiTutorial() {
-            document.getElementById('tutorial-overlay').style.display = 'none';
-            controllaServer();
-        }
-
-        // VERIFICA TIMEOUT SERVER RENDER (10 Secondi)
-        async function controllaServer() {
-            const overlay = document.getElementById('error-overlay');
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
-                const res = await fetch(SERVER_URL + '/', { signal: controller.signal });
-                clearTimeout(timeoutId);
-                if (res.ok) { overlay.style.display = 'none'; } else { overlay.style.display = 'block'; }
-            } catch(e) { overlay.style.display = 'block'; }
-        }
-
-        // APERTURA CHECKOUT STRIPE SANDBOX
-        async function attivaAbbonamento() {
-            const overlay = document.getElementById('error-overlay');
-            try {
-                const response = await fetch(SERVER_URL + '/create-checkout-session', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const session = await response.json();
-                if (session.id) {
-                    window.location.href = "https://stripe.com" + session.id;
-                } else { overlay.style.display = 'block'; }
-            } catch (error) { overlay.style.display = 'block'; }
-        }
-    </script>
-</body>
-</html>
-
+// Funzione da chiamare quando finisce il quiz per avviare il gioco
+function startMinigame() {
+    document.getElementById('game-screen').style.display = 'block';
+}
+</script>
