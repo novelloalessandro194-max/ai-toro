@@ -4,33 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ancubu: L'Impero del Minotauro</title>
-    <!-- Script di Stripe per gestire i pagamenti reali della Spada Antimateria da 3€ e del VIP -->
+    <!-- Librerie ufficiali per i pagamenti e la simulazione del corridoio 3D -->
     <script src="https://stripe.com"></script>
+    <script src="https://cloudflare.com"></script>
     <style>
-        /* ESTETICA PULITA DA SCREENSHOT REALE: NERO, ORO E NEON SOTTILE */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.5px; background: #08080c; color: #ffffff; }
+        /* ESTETICA CYBERPUNK PULITA DA SCREENSHOT REALE */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; letter-spacing: 0.5px; background: #050508; color: #ffffff; }
+        body { overflow: hidden; user-select: none; -webkit-user-select: none; }
         
-        .schermata { display: none; width: 100vw; height: 100vh; position: fixed; top:0; left:0; flex-direction: column; justify-content: center; align-items: center; padding: 25px; text-align: center; }
+        .schermata { display: none; width: 100vw; height: 100vh; position: fixed; top:0; left:0; flex-direction: column; justify-content: center; align-items: center; padding: 25px; text-align: center; z-index: 10; }
         .attiva { display: flex; }
 
-        /* ANIMAZIONE DEL MINOTAURO DEL TUTORIAL CHE SBATTE GLI OCCHI */
-        #sprite-minotauro { width: 130px; height: 130px; background: #b08d57; border-radius: 40% 40% 50% 50%; position: relative; margin-bottom: 25px; animation: respira 1.5s infinite ease-in-out; border: 3px solid #111; }
-        #sprite-minotauro::before, #sprite-minotauro::after { content: ''; position: absolute; width: 22px; height: 12px; background: #000; top: 50px; border-radius: 50%; animation: sbatte 3.5s infinite; }
-        #sprite-minotauro::before { left: 30px; } #sprite-minotauro::after { right: 30px; }
-        @keyframes respira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
-        @keyframes sbatte { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+        /* SBLOCCO DEL MOTORE GRAFICO TRIDIMENSIONALE */
+        #canvas-3d { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; display: none; background: transparent; }
 
-        /* PULSANTI E INTERFACCIA STILE CLEAN DA SCREENSHOT */
         .btn-opzione { display: block; width: 100%; max-width: 340px; background: #12121a; border: 2px solid #b08d57; color: #fff; padding: 16px; margin: 12px 0; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; }
         .btn-opzione:hover { background: #b08d57; color: #000; box-shadow: 0 0 20px rgba(176, 141, 87, 0.4); }
 
-        /* EFFETTI DI TRANSIZIONE E VIDEOGIOCO */
+        /* EFFETTI VISIVI DEL RISVEGLIO TERMINALE */
         .effetto-rosso { animation: riempimentoRosso 3s forwards; }
-        @keyframes riempimentoRosso { to { background-color: #7b0000; } }
+        @keyframes riempimentoRosso { to { background-color: #610000; } }
         .trema { animation: terremoto 0.1s infinite; }
         @keyframes terremoto { 0% { translate: 1px 1px; } 50% { translate: -1px -1px; } 100% { translate: 1px -1px; } }
 
-        /* GRIGLIA HOME PRINCIPALE */
         #griglia-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; width: 100%; max-width: 480px; margin-top: 30px; background: transparent; }
         .card-menu { background: #111116; border: 2px solid #22222a; padding: 24px; border-radius: 14px; font-weight: bold; text-transform: uppercase; font-size: 13px; color: #b08d57; cursor: pointer; text-align: center; transition: 0.2s; }
         .card-menu:hover { border-color: #b08d57; box-shadow: 0 0 15px rgba(176, 141, 87, 0.3); }
@@ -39,51 +35,49 @@
         .btn-indietro { background: #cc2424; border: none; color: #fff; padding: 8px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; text-transform: uppercase; }
         .box-contenuto { background: #111116; width: 100%; max-width: 480px; padding: 25px; border-radius: 16px; border: 1px solid #22222a; overflow-y: auto; max-height: 72vh; }
 
-        /* SPADA PREMIUM ANTIMATERIA 3€ D'ÉLITE */
-        .btn-antimateria { background: linear-gradient(45deg, #050508, #120224); border: 2px solid #7928ca; color: #fff; padding: 22px; border-radius: 14px; font-size: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 15px; text-transform: uppercase; transition: 0.3s; }
-        .btn-antimateria:hover { box-shadow: 0 0 25px #7928ca; transform: scale(1.02); }
-
-        #vision-ai-schermo { width: 100vw; height: 100vh; background: #000; position: fixed; top: 0; left: 0; z-index: 999; display: none; flex-direction: column; justify-content: space-between; padding: 25px; }
+        .btn-antimateria { background: linear-gradient(45deg, #050508, #120224); border: 2px solid #7928ca; color: #fff; padding: 22px; border-radius: 14px; font-size: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 15px; text-transform: uppercase; }
         .tag-vip-oro { background: linear-gradient(45deg, #b08d57, #fff); color: #000; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; margin-right: 8px; }
         .riga-rank { padding: 14px; border-radius: 10px; margin-bottom: 8px; text-align: left; font-weight: bold; font-size: 14px; background: #161622; }
     </style>
 </head>
 <body>
 
-    <!-- FASE 1: TUTORIAL INTERATTIVO DEL MINOTAURO CHE FA LE DOMANDE -->
+    <canvas id="canvas-3d"></canvas>
+
+    <!-- FASE 1: TUTORIAL ED IL RISVEGLIO DI ANCUBU (IMMAGINE REALE) -->
     <div id="schermata-tutorial" class="schermata attiva">
-        <div id="sprite-minotauro"></div>
+        <!-- IMMAGINE VERAMENTE FIGA DI UN MINOTAURO SCURO BLINDATO -->
+        <img id="sprite-minotauro" src="https://unsplash.com" 
+             onmousedown="startHold(event)" ontouchstart="startHold(event)" 
+             style="width: 180px; height: 180px; object-fit: cover; border-radius: 20px; border: 3px solid #b08d57; box-shadow: 0 0 25px rgba(176, 141, 87, 0.4); cursor: pointer; margin-bottom: 25px; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;">
+
         <div class="box-contenuto" style="max-width: 380px;">
             <h3 id="testo-tutorial" style="color: #b08d57; margin-bottom: 20px; font-size: 14px; text-transform: uppercase; background: transparent;">Tieni premuto sopra il minotauro per 3 secondi per svegliarlo</h3>
             <div id="box-hold" style="width:100%; height:8px; background:#22222a; border-radius:4px; overflow:hidden; margin-bottom:20px;">
                 <div id="barra-progress" style="width:0%; height:100%; background:#b08d57; transition: width 0.1s;"></div>
             </div>
             
-            <!-- Questionario di livello in crescenza in stile LiftOff spiegato dal Minotauro -->
             <div id="opzioni-tutorial" style="display:none; background: transparent;">
                 <p id="domanda-tutorial-testo" style="color:#888; margin-bottom:15px; font-size: 13px; background: transparent;">Vediamo a che punto sei! Da quanto tempo ti alleni?</p>
                 <div id="container-risposte-tutorial" style="background: transparent;">
                     <button class="btn-opzione" onclick="prossimaDomandaTutorial(1)">Mai allenato</button>
                     <button class="btn-opzione" onclick="prossimaDomandaTutorial(2)">Mi alleno da pochi mesi</button>
-                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(3)">Mi alleno regolarmente</button>
-                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(4)">Sono un esperto</button>
+                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(3)">Sono un esperto della sbarra</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FASE 2: PROLOGO IN PRIMA PERSONA - INSEGUIMENTO DEI MERCANTI -->
-    <div id="schermata-fuga" class="schermata">
-        <h2 id="alert-fuga" style="color:#ff3333; margin-bottom:25px; font-size: 18px; text-transform:uppercase; background: transparent;">I mercanti ti rifiutano e ti mandano via! Ti inseguono con i forconi!</h2>
-        <p style="color:#888; margin-bottom:30px; font-size: 14px; background: transparent;">Scappa in prima persona verso il portone gigante che pian piano si apre!</p>
-        <button class="btn-opzione" style="background:#cc2424; border:none; font-size:18px;" onclick="eseguiFuga()">SCAPPA ALLA VELOCITÀ DELLA LUCE</button>
-        <div id="portone" style="width:140px; height:180px; background:#161622; border:3px solid #b08d57; margin-top:35px; transition: all 0.5s; display:flex; align-items:center; justify-content:center; font-size:12px; color:#888;">PORTONE GIGANTE</div>
+    <!-- FASE 2: PROLOGO IN PRIMA PERSONA COINVOLGENTE -->
+    <div id="schermata-fuga" class="schermata" style="background: transparent;">
+        <h2 style="color:#ff3333; margin-bottom:25px; font-size: 18px; text-transform:uppercase; background: transparent; text-shadow: 0 0 10px #000;">I mercanti ti rifiutano e ti inseguono con i forconi! SCAPPA!</h2>
+        <button class="btn-opzione" style="background:#cc2424; border:none; font-size:18px; z-index: 20;" onclick="eseguiFuga3D()">CORRI NEL CORRIDOIO 3D!</button>
     </div>
 
-    <!-- FASE 3: DASHBOARD PRINCIPALE CON LE 6 SEZIONI RICHIESTE -->
+    <!-- FASE 3: MENU PRINCIPALE (DASHBOARD COMPLETA A 6 SEZIONI) -->
     <div id="schermata-home" class="schermata">
         <h1 style="color:#b08d57; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; background: transparent;">Ancubu Impero</h1>
-        <p id="stats-profilo" style="color:#666; margin-top:6px; font-size: 13px; background: transparent;">Rank: Legno | Oro: 0 | Vita: 100 | Forza: 10 | Velocità: 10</p>
+        <p id="stats-profilo" style="color:#666; margin-top:6px; font-size: 13px; background: transparent;">Rank: Legno | Oro: 0 | Vita: 100 | Forza: 10</p>
         
         <div id="griglia-menu">
             <div class="card-menu" onclick="apriSez('allenamento')">Allenamento</div>
@@ -95,87 +89,68 @@
         </div>
     </div>
 
-    <!-- SEZIONE 1: ALLENAMENTO (RANK UP, SCHEDA E VISION AI CORRETTIVA) -->
+    <!-- 1. ALLENAMENTO -->
     <div id="sez-allenamento" class="schermata">
         <div class="header-sezione"><h2>Allenamento</h2><button class="btn-indietro" onclick="chiudiSez('allenamento')">Chiudi</button></div>
         <div class="box-contenuto">
-            <h3 style="color:#b08d57; margin-bottom:15px; font-size:14px;">SCHEDA ALLENAMENTO ATTIVA</h3>
-            <button class="btn-opzione" style="background:#00b0ff; color:#000; border:none;" onclick="attivaVisionAI()">Avvia Vision AI con fotocamera live correttiva</button>
-            <button class="btn-opzione" style="background:#cc2424; border:none; margin-top:15px;" onclick="avviaBossFight()">Sfida il Boss per fare Rank Up</button>
-            <button class="btn-opzione" style="background:#22222a; border-color:#444; margin-top:15px;" onclick="apriArenaOpzionale()">Accedi all'arena dei bastardi</button>
+            <button class="btn-opzione" style="background:#00b0ff; color:#000; border:none;" onclick="attivaVisionAI()">Avvia Vision AI fotocamera live</button>
+            <button class="btn-opzione" style="background:#cc2424; border:none; margin-top:15px;" onclick="avviaBossFight()">Sfida il Boss del Rank Up</button>
+            <button class="btn-opzione" style="background:#22222a; border-color:#444; margin-top:15px;" onclick="apriArenaOpzionale()">Arena: Mentre aspetti vuoi uccidere qualche bastardo?</button>
         </div>
     </div>
 
-    <!-- SEZIONE 2: VIP (ABBONAMENTO STRIPE 3,99€ CON TITOLO E VELOCITÀ) -->
+    <!-- 2. VIP -->
     <div id="sez-vip" class="schermata">
         <div class="header-sezione"><h2>Sezione VIP</h2><button class="btn-indietro" onclick="chiudiSez('vip')">Chiudi</button></div>
         <div class="box-contenuto">
-            <p style="line-height:1.6; margin-bottom:25px; color:#aaa; font-size:14px;">L'abbonamento VIP migliora la velocità e il calcolo dell'IA vocale, sblocca il titolo [VIP] d'oro dietro al nome quando scrivi in chat e ti permette di scegliere il colore dell'home e del menu.</p>
+            <p style="line-height:1.6; margin-bottom:25px; color:#aaa; font-size:14px;">L'abbonamento VIP sblocca la velocità di calcolo dell'IA, il titolo d'oro [VIP] in chat e la scelta del colore del menu.</p>
             <button class="btn-opzione" style="background:#b08d57; color:#000;" onclick="pagaStripe('vip')">Attiva VIP (3,99€ / Mese)</button>
         </div>
     </div>
-        <!-- 3. SEZIONE: MIGLIORA IL TUO MINOTAURO -->
+
+    <!-- 3. MIGLIORA IL TUO MINOTAURO -->
     <div id="sez-migliora" class="schermata">
         <div class="header-sezione"><h2>Migliora il tuo Minotauro</h2><button class="btn-indietro" onclick="chiudiSez('migliora')">Chiudi</button></div>
         <div class="box-contenuto">
-            <p style="margin-bottom:20px; color:#aaa; font-size:13px; background:transparent;">Puoi migliorare i parametri solo dopo aver completato un allenamento o ucciso un boss usando l'oro guadagnato.</p>
-            <div style="display:flex; justify-content:space-around; margin-bottom:20px; align-items:center; background:transparent;">
-                <div style="width:60px; height:60px; background:#b08d57; border-radius:10px;"></div>
-                <div style="text-align:left; font-size:12px; background:transparent;">
-                    <p id="txt-upgrade-vita" style="background:transparent;">Vita attuale: 100</p>
-                    <p id="txt-upgrade-forza" style="background:transparent;">Forza attuale: 10</p>
-                    <p id="txt-upgrade-velocita" style="background:transparent;">Velocità attuale: 10</p>
-                </div>
-            </div>
+            <p id="txt-upgrade-vita">Vita attuale: 100</p>
             <button class="btn-opzione" onclick="potenzia('vita')">Migliora Vita (Costo 1 Oro)</button>
-            <button class="btn-opzione" onclick="potenzia('forza')">Migliora Forza (Costo 1 Oro)</button>
-            <button class="btn-opzione" onclick="potenzia('velocita')">Migliora Velocità (Costo 1 Oro)</button>
         </div>
     </div>
 
-    <!-- 4. SEZIONE: STILE (ARMERIA) -->
+    <!-- 4. STILE & SHOP DELLE SPADE -->
     <div id="sez-stile" class="schermata">
         <div class="header-sezione"><h2>Sezione Stile</h2><button class="btn-indietro" onclick="chiudiSez('stile')">Chiudi</button></div>
         <div class="box-contenuto">
-            <h4 style="color:#b08d57; font-size:13px; margin-bottom:10px; text-transform:uppercase; background:transparent;">Arsenale Spade (Oro del Gioco):</h4>
-            <button class="btn-opzione" style="text-align:left; font-size:12px;" onclick="compraArmaOro(1, 'Spada di Ferro')">1 Oro: Spada di Ferro (Lancia Dismantle)</button>
-            <button class="btn-opzione" style="text-align:left; font-size:12px;" onclick="compraArmaOro(2, 'Spada di Diamante')">2 Oro: Spada di Diamante (Taglio della Testa al Boss)</button>
-            <button class="btn-opzione" style="text-align:left; font-size:12px;" onclick="compraArmaOro(4, 'Spada Universale')">4 Oro: Spada Universale (Texture Universo, Spari Supernova e Raggi, Diventi Gigante di Stelle)</button>
-            <button class="btn-opzione" style="text-align:left; font-size:12px;" onclick="compraArmaOro(5, 'Spada Suprema')">5 Oro: Spada Suprema (Usa la spada da 4 ma spari Buchi Neri e lanci Stelle)</button>
-            
-            <h4 style="color:#7928ca; font-size:13px; margin-top:25px; margin-bottom:10px; text-transform:uppercase; background:transparent;">Arma ad Alterazione Premium:</h4>
-            <button class="btn-antimateria" onclick="pagaStripe('spada')">Spada Antimateria (3,00€)<br><span style="font-size:11px; text-transform:none; color:#888; font-weight:normal; background:transparent;">Diventi un Angelo Oscuro. Taglia il cielo in due creando una linea viola, immortalità per 5s e schivata assoluta.</span></button>
-            
-            <h4 style="color:#b08d57; font-size:13px; margin-top:25px; text-transform:uppercase; background:transparent;">Personalizza Colore Minotauro:</h4>
+            <h4 style="color:#b08d57; font-size:13px; margin-bottom:10px; text-transform:uppercase; background:transparent;">Spade (Oro del Gioco):</h4>
+            <button class="btn-opzione" onclick="compraArmaOro(1, 'Spada di Ferro')">1 Oro: Spada di Ferro (Dismantle)</button>
+            <button class="btn-opzione" onclick="compraArmaOro(2, 'Spada di Diamante')">2 Oro: Spada di Diamante (Taglio Testa)</button>
+                        <button class="btn-opzione" onclick="compraArmaOro(4, 'Spada Universale')">4 Oro: Spada Universale (Supernova)</button>
+            <button class="btn-opzione" onclick="compraArmaOro(5, 'Spada Suprema')">5 Oro: Spada Suprema (Buchi Neri)</button>
+            <button class="btn-antimateria" onclick="pagaStripe('spada')">Spada Antimateria (3,00€)</button>
             <select id="select-colore" class="btn-opzione" style="background:#111116; margin-top:10px; width:100%; border-color:#444;" onchange="cambiaColoreMino()">
-                <option value="Default">Default (Marrone/Oro)</option>
+                <option value="Default">Default</option>
                 <option value="Rosso">Rosso Fuoco</option>
                 <option value="Smeraldo">Verde Smeraldo</option>
-                <option value="Oro Puro">Oro Puro</option>
+                <option value="Oro">Oro Puro</option>
             </select>
         </div>
     </div>
 
-    <!-- 5. SEZIONE: CHAT COMMUNITY -->
+    <!-- 5. CHAT -->
     <div id="sez-chat" class="schermata">
         <div class="header-sezione"><h2>Chat Community</h2><button class="btn-indietro" onclick="chiudiSez('chat')">Chiudi</button></div>
         <div class="box-contenuto">
-            <div id="box-messaggi" style="height:200px; background:#08080c; border:1px solid #22222a; border-radius:10px; overflow-y:auto; padding:12px; text-align:left; margin-bottom:15px; font-size:13px;"></div>
-            <div style="display:flex; flex-direction:column; gap:10px; background: transparent;">
-                <input type="text" id="input-msg" style="width:100%; padding:14px; background:#12121a; border:1px solid #333; color:#fff; border-radius:10px; font-size:13px;" placeholder="Scrivi un messaggio globale...">
-                <div style="display:flex; gap:10px; background:transparent;">
-                    <input type="number" id="input-donazione" style="width:90px; padding:10px; background:#12121a; border:1px solid #333; color:#d4af37; border-radius:10px; font-size:12px;" placeholder="Dona €">
-                    <button style="flex:1; background:#b08d57; border:none; border-radius:10px; font-weight:bold; color:#000; text-transform:uppercase; font-size:12px; cursor:pointer;" onclick="inviaMsg()">Invia Messaggio / Feedback</button>
-                </div>
-            </div>
+            <div id="box-messaggi" style="height:180px; background:#08080c; border:1px solid #22222a; border-radius:8px; overflow-y:auto; padding:10px; margin-bottom:10px;"></div>
+            <input type="text" id="input-msg" style="width:100%; padding:14px; background:#12121a; border:1px solid #333; color:#fff; border-radius:8px;" placeholder="Scrivi un messaggio...">
+            <button class="btn-opzione" style="margin-top:8px; padding:10px;" onclick="inviaMsg()">Invia</button>
         </div>
     </div>
 
-    <!-- 6. SEZIONE: CLASSIFICA CON I 9 RANK UFFICIALI -->
+    <!-- 6. CLASSIFICA (I 9 RANK REALI DELLO SCREENSHOT) -->
     <div id="sez-classifica" class="schermata">
         <div class="header-sezione"><h2>Classifica dell'Impero</h2><button class="btn-indietro" onclick="chiudiSez('classifica')">Chiudi</button></div>
         <div class="box-contenuto">
-            <div class="riga-rank" style="border: 2px solid #ff2222; color:#ff2222; background: rgba(255,34,34,0.05);">Rank 9: MINOTAURO (Grado Supremo Finale)</div>
+            <div class="riga-rank" style="border: 2px solid #ff2222; color:#ff2222;">Rank 9: MINOTAURO</div>
             <div class="riga-rank" style="color:#00ffff;">Rank 8: Divino</div>
             <div class="riga-rank" style="color:#a855f7;">Rank 7: Colosso</div>
             <div class="riga-rank" style="color:#ff00ff;">Rank 6: Assassino</div>
@@ -187,71 +162,45 @@
         </div>
     </div>
 
-    <!-- SCHERMATA VISION AI SCHERMO INTERO -->
     <div id="vision-ai-schermo">
-        <h2 style="color:#00b0ff; text-transform:uppercase; font-size:18px; background:transparent;">Vision AI: Analisi Esercizio Correttiva dal Vivo</h2>
-        <div style="width:100%; height:68vh; border:2px dashed #00b0ff; border-radius:16px; display:flex; justify-content:center; align-items:center; color:#444; font-size:14px; text-transform:uppercase; background:transparent;">
-            [ Fotocamera attiva a schermo intero - Inquadra la sbarra ]
-        </div>
-        <p style="color:#aaa; font-size:13px; background:transparent;">L'IA Vocale sta controllando i tuoi muscoli e ti corregge dal vivo...</p>
-        <button class="btn-indietro" style="width:100%; background:#222; border:1px solid #ff3333; color:#ff3333; padding:16px;" onclick="chiudiVisionAI()">Spegni Fotocamera Live</button>
+        <h2 style="color:#00b0ff;">Vision AI Attiva dal Vivo</h2>
+        <button class="btn-indietro" onclick="chiudiVisionAI()">Spegni Fotocamera</button>
     </div>
 
-    <!-- ARENA EXTRA: LA FRASE ESATTA RICHIESTA -->
     <div id="schermata-arena-bastardi" class="schermata" style="background:#0a0303;">
-        <h2 style="color:#cc2424; font-size:18px; text-transform:uppercase; margin-bottom:15px; background:transparent;">Mentre aspetti vuoi uccidere qualche bastardo?</h2>
+        <h2 style="color:#cc2424; font-size:16px; background:transparent;">Mentre aspetti vuoi uccidere qualche bastardo?</h2>
         <div id="arena-nemico" style="width:80px; height:80px; background:#cc2424; margin:35px 0; border-radius:12px; box-shadow:0 0 15px #cc2424;"></div>
-        <button class="btn-opzione" style="background:#cc2424; color:#fff;" onclick="colpisciBastardo()">Attacca ed elimina il bastardo in arena</button>
-        <button class="btn-indietro" style="margin-top:25px; background:#222;" onclick="chiudiArenaOpzionale()">Torna agli allenamenti</button>
+        <button class="btn-opzione" style="background:#cc2424; color:#fff;" onclick="alert('Bastardo ucciso!')">SI (UCCIDI)</button>
+        <button class="btn-indietro" style="margin-top:20px; background:#222;" onclick="chiudiArenaOpzionale()">Torna indietro</button>
     </div>
 
-    <!-- INFRASTRUTTURA BOSS CON GRANDEZZA DINAMICA -->
     <div id="schermata-boss" class="schermata" style="background:#050508;">
-        <h2 style="font-size:20px; text-transform:uppercase; color:#cc2424; background:transparent;">Scontro per il Rank Up</h2>
+        <h2>Scontro del Rank Up</h2>
         <div id="boss-sprite-dinamico" style="width:45px; height:45px; background:#cc2424; border:2px solid #fff; border-radius:10px; margin:45px 0; transition: transform 0.4s ease-out;"></div>
-        <h3 id="boss-nome-txt" style="color:#cc2424; font-size:18px; text-transform:uppercase; margin-bottom:5px; background:transparent;">Boss</h3>
-        <p id="boss-hp-txt" style="color:#888; font-size:14px; background:transparent;">HP: 120</p>
-        <button class="btn-opzione" style="background:#cc2424; color:#fff; border:none; margin-top:25px;" onclick="colpisciBossDinamico()">Sferra attacco al boss</button>
+        <h3 id="boss-nome-txt" style="color:#cc2424;">Boss</h3>
+        <p id="boss-hp-txt">HP: 120</p>
+        <button class="btn-opzione" style="background:#cc2424;" onclick="colpisciBossDinamico()">Attacca</button>
     </div>
 
-    <!-- LOGICA SCRIPT DEL LOG IN E DELLO SBLOCCO DI SYSTEMA -->
     <script>
         const SERVER_URL = "https://IL_TUO_PROGETTO_SU_://onrender.com"; 
         const stripe = Stripe('pk_test_INCOLLA_QUI_LA_TUA_CHIAVE_PUBBLICA_STRIPE'); 
 
-        const GRADI_IMPERO = ['Legno', 'Bronzo', 'Argento', 'Oro', 'Diamante', 'Assassino', 'Colosso', 'Divino', 'MINOTAURO'];
-
-        let datiMino = { 
-            userId: "Mino_" + Math.floor(Math.random()*9999), 
-            rankIndex: 0, 
-            rankAttuale: "Legno", 
-            oro: 0, 
-            isVip: false,
-            vita: 100,
-            forza: 10,
-            velocita: 10,
-            colore: "Default"
-        };
-        
-        let holdCount = 0;
-        let progressInterval;
+        let datiMino = { userId: "Mino_" + Math.floor(Math.random()*9999), rankIndex: 0, rankAttuale: "Legno", oro: 0, isVip: false, vita:100, forza:10, velocita:10 };
+        let holdCount = 0, progressInterval;
 
         const minoTutorialBtn = document.getElementById('sprite-minotauro');
         minoTutorialBtn.addEventListener('mousedown', startHold);
         minoTutorialBtn.addEventListener('touchstart', startHold);
-                minoTutorialBtn.addEventListener('mouseup', endHold);
+        minoTutorialBtn.addEventListener('mouseup', endHold);
         minoTutorialBtn.addEventListener('touchend', endHold);
 
         function startHold(e) {
-            e.preventDefault();
-            holdCount = 0;
+            e.preventDefault(); holdCount = 0;
             progressInterval = setInterval(() => {
                 holdCount += 10;
                 document.getElementById('barra-progress').style.width = (holdCount / 3) + "%";
-                if(holdCount >= 300) {
-                    clearInterval(progressInterval);
-                    svegliaCavaliere();
-                }
+                if(holdCount >= 300) { clearInterval(progressInterval); svegliaCavaliere(); }
             }, 100);
         }
         function endHold() { clearInterval(progressInterval); holdCount = 0; document.getElementById('barra-progress').style.width = "0%"; }
@@ -260,159 +209,132 @@
             document.getElementById('schermata-tutorial').classList.add('trema');
             document.getElementById('schermata-tutorial').classList.add('effetto-rosso');
             
-            // LA VOCE AI DEL CAVALIERE COMODA E CUPA (ROBOTICA) STILE OPTIMUS PRIME
             const msg = new SpeechSynthesisUtterance("IO SONO ANCUBU E SONO QUI PER GUIDARTI, AIUTARTI NELL’ARRIVARE VERSO IL TUO FISICO FINALE E FARTI CAPIRE QUANTO E FORTE IL TUO POTENZIALE");
-            msg.pitch = 0.2; msg.rate = 0.80; msg.lang = 'it-IT';
+            msg.pitch = 0.2; msg.rate = 0.85; msg.lang = 'it-IT';
             window.speechSynthesis.speak(msg);
 
             setTimeout(() => {
                 document.getElementById('schermata-tutorial').classList.remove('trema');
-                document.getElementById('testo-tutorial').innerText = "Ancubu si è alzato, ha fatto girare la spada e l'ha sbattuta per terra!";
+                document.getElementById('testo-tutorial').innerText = "Ancubu è sveglio.";
                 document.getElementById('opzioni-tutorial').style.display = "block";
             }, 3000);
         }
 
-        // DOMANDE INTERATTIVE LIFTOFF GESTITE IN DIVERSE SEZIONI
         let stepTutorial = 1;
         function prossimaDomandaTutorial(rispostaId) {
             if(stepTutorial === 1) {
-                document.getElementById('domanda-tutorial-testo').innerText = "A che ora e in che giorno preferisci allenarti?";
-                document.getElementById('container-risposte-tutorial').innerHTML = `
-                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(5)">Mattina alle 08:00</button>
-                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(5)">Pomeriggio alle 15:00</button>
-                    <button class="btn-opzione" onclick="prossimaDomandaTutorial(5)">Sera alle 20:00</button>
-                `;
-                stepTutorial = 2;
-            } else if(stepTutorial === 2) {
                 document.getElementById('domanda-tutorial-testo').innerText = "Quanti giorni a settimana vuoi spaccare la sbarra?";
                 document.getElementById('container-risposte-tutorial').innerHTML = `
-                    <button class="btn-opzione" onclick="setLivello()">2 Giorni a settimana</button>
-                    <button class="btn-opzione" onclick="setLivello()">3 Giorni a settimana</button>
-                    <button class="btn-opzione" onclick="setLivello()">4 Giorni a settimana</button>
+                    <button class="btn-opzione" onclick="setLivello()">3 Giorni</button>
                     <button class="btn-opzione" onclick="setLivello()">Tutti i giorni intensivo</button>
                 `;
-                stepTutorial = 3;
+                stepTutorial = 2;
             }
         }
 
-        function setLivello() { cambiaSchermata('schermata-tutorial', 'schermata-fuga'); }
+        function setLivello() { 
+            document.getElementById('schermata-tutorial').style.display = 'none';
+            document.getElementById('schermata-fuga').style.display = 'flex';
+            inizializzaMotore3D(); 
+        }
 
-        // PROLOGO IN PRIMA PERSONA: FUGA DAI MERCANTI CON I FORCONI VERSO IL PORTONE
-        let clickFuga = 0;
-        function eseguiFuga() {
-            clickFuga++;
-            document.getElementById('portone').style.transform = `scale(${1 + clickFuga*0.25})`;
-            if(clickFuga >= 7) {
-                alert("BOOM! Spacchi il portone gigante ed entri nel menu principale!");
+        // --- MOTORE GRAFICO 3D REALE NELLO SPAZIO (THREE.JS) ---
+        let scene, camera, renderer, tunnelMesh;
+        function inizializzaMotore3D() {
+            const canvas = document.getElementById('canvas-3d');
+            canvas.style.display = "block";
+
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x050010);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const geometry = new THREE.CylinderGeometry(5, 5, 40, 16, 1, true);
+            const material = new THREE.MeshBasicMaterial({ color: 0xb08d57, wireframe: true });
+            tunnelMesh = new THREE.Mesh(geometry, material);
+            tunnelMesh.rotation.x = Math.PI / 2;
+            scene.add(tunnelMesh);
+
+            camera.position.z = 18;
+            animate3D();
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            tunnelMesh.rotation.y += 0.005; 
+            renderer.render(scene, camera);
+        }
+
+        let avanzamento3D = 0;
+        function eseguiFuga3D() {
+            avanzamento3D++;
+            camera.position.z -= 2.2; 
+            if(avanzamento3D >= 7) {
+                document.getElementById('canvas-3d').style.display = "none";
                 cambiaSchermata('schermata-fuga', 'schermata-home');
             }
         }
 
         function apriSez(id) { cambiaSchermata('schermata-home', 'sez-' + id); }
         function chiudiSez(id) { cambiaSchermata('sez-' + id, 'schermata-home'); }
-        
         function cambiaSchermata(v, n) {
-            document.getElementById(v).classList.remove('attiva'); document.getElementById(v).style.display = 'none';
-            document.getElementById(n).classList.add('attiva'); document.getElementById(n).style.display = 'flex';
+            document.getElementById(v).style.display = 'none'; document.getElementById(n).style.display = 'flex';
         }
 
-        // VISION AI COPERTURA SCHERMO INTERO REALE
         function attivaVisionAI() { document.getElementById('vision-ai-schermo').style.display = "flex"; }
         function chiudiVisionAI() { document.getElementById('vision-ai-schermo').style.display = "none"; }
-        
-        // ARENA OPZIONALE SENZA AGGIUNTE DI TESTO
         function apriArenaOpzionale() { cambiaSchermata('sez-allenamento', 'schermata-arena-bastardi'); }
         function chiudiArenaOpzionale() { cambiaSchermata('schermata-arena-bastardi', 'sez-allenamento'); }
-        function colpisciBastardo() { alert("Bastardo eliminato con successo nei 5 secondi d'attesa!"); chiudiArenaOpzionale(); }
 
-        // POTENZIAMENTI STATISTICHE DOPO WORKOUT
-        function potenzia(tipo) {
-            if(datiMino.oro >= 1) {
-                datiMino.oro -= 1;
-                datiMino[tipo] += 10;
-                aggiornaInterfacciaStats();
-                alert(`Parametro ${tipo} migliorato di +10!`);
-            } else { alert("Oro insufficiente! Devi prima completare un allenamento o uccidere un boss!"); }
-        }
+        function potenzia(tipo) { if(datiMino.oro >= 1) { datiMino.oro--; datiMino[tipo]+=10; aggiornaInterfacciaStats(); } }
+        function compraArmaOro(costo, nome) { if(datiMino.oro >= costo) { datiMino.oro -= costo; aggiornaInterfacciaStats(); alert('Arma Sbloccata!'); } }
+        function cambiaColoreMino() { alert('Colore aggiornato!'); }
+        function aggiornaInterfacciaStats() { document.getElementById('stats-profilo').innerText = `Rank: ${datiMino.rankAttuale} | Oro: ${datiMino.oro}`; }
 
-        function compraArmaOro(costo, nomeSpada) {
-            if(datiMino.oro >= costo) {
-                datiMino.oro -= costo;
-                aggiornaInterfacciaStats();
-                alert(`Hai sbloccato la ${nomeSpada}! Nuove abilità magiche caricate nel Minotauro.`);
-            } else { alert(`Ti serve ${costo} Oro per comprare questa spada!`); }
-        }
-
-        function cambiaColoreMino() {
-            const sc = document.getElementById('select-colore').value;
-            datiMino.colore = sc;
-            aggiornaInterfacciaStats();
-            alert(`Colore del corpo del tuo Minotauro modificato in: ${sc}`);
-        }
-
-        function aggiornaInterfacciaStats() {
-            document.getElementById('stats-profilo').innerText = `Rank: ${datiMino.rankAttuale} | Oro: ${datiMino.oro} | Vita: ${datiMino.vita} | Forza: ${datiMino.forza} | Velocità: ${datiMino.velocita}`;
-            document.getElementById('txt-upgrade-vita').innerText = `Vita attuale: ${datiMino.vita}`;
-            document.getElementById('txt-upgrade-forza').innerText = `Forza attuale: ${datiMino.forza}`;
-            document.getElementById('txt-upgrade-velocita').innerText = `Velocità attuale: ${datiMino.velocita}`;
-            document.getElementById('riga-tuo-rank').innerText = `Rank ${datiMino.rankIndex + 1}: ${datiMino.rankAttuale} (Il tuo grado attuale)`;
-        }
-
-        // LOGICA BOSS FIGHT DEL RANK UP CON GRANDEZZA E HP CRESCENTI
-        let bossHp = 100;
+        let bossDinamicoHp = 100;
         async function avviaBossFight() {
-            const res = await fetch(`${SERVER_URL}/api/minotauro/info-boss/${datiMino.rankIndex}`);
+                        const res = await fetch(`${SERVER_URL}/api/minotauro/info-boss/${datiMino.rankIndex}`);
             const boss = await res.json();
-            if(boss.nome) {
-                bossHp = boss.hp;
-                document.getElementById('boss-nome-txt').innerText = boss.nome;
-                document.getElementById('boss-hp-txt').innerText = "HP: " + boss.hp;
-                document.getElementById('boss-sprite-dinamico').style.transform = `scale(${boss.scala})`;
-                cambiaSchermata('sez-allenamento', 'schermata-boss');
-            } else { alert("Sei già arrivato al grado supremo finale di MINOTAURO!"); }
-        }
-
-        async function colpisciBossDinamico() {
-            bossHp -= (datiMino.forza * 5); 
-            document.getElementById('boss-hp-txt').innerText = "HP: " + bossHp;
-            if(bossHp <= 0) {
-                const res = await fetch(`${SERVER_URL}/api/minotauro/conferma-rankup`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ userId: datiMino.userId })
-                });
-                const r = await res.json();
-                datiMino.rankIndex++;
-                datiMino.rankAttuale = r.nuovoRank;
-                datiMino.oro = r.oroAttuale;
-                aggiornaInterfacciaStats();
-                alert(`VITTORIA EPICA! Il boss è crollato. Sei avanzato al grado: ${r.nuovoRank}! Ottieni monete d'oro.`);
-                cambiaSchermata('schermata-boss', 'schermata-home');
+            if(boss.nome) { 
+                bossDinamicoHp = boss.hp; 
+                document.getElementById('boss-hp-txt').innerText = "HP: " + boss.hp; 
+                document.getElementById('boss-sprite-dinamico').style.transform = `scale(${boss.scala})`; 
+                cambiaSchermata('sez-allenamento', 'schermata-boss'); 
             }
         }
 
-        // REINDIRIZZAMENTO AI TERMINALI STRIPE REALI DI CHECKOUT VIA BACKEND
+        async function colpisciBossDinamico() {
+            bossDinamicoHp -= 50; 
+            document.getElementById('boss-hp-txt').innerText = "HP: " + bossDinamicoHp;
+            if(bossDinamicoHp <= 0) { 
+                datiMino.rankIndex++; 
+                datiMino.oro += 2; 
+                aggiornaInterfacciaStats(); 
+                alert('Boss sconfitto!'); 
+                cambiaSchermata('schermata-boss', 'schermata-home'); 
+            }
+        }
+
         async function pagaStripe(tipo) {
             const rotta = tipo === 'vip' ? 'vip' : 'spada-antimateria';
-            const res = await fetch(`${SERVER_URL}/api/checkout/${rotta}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ userId: datiMino.userId })
+            const res = await fetch(`${SERVER_URL}/api/checkout/${rotta}`, { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ userId: datiMino.userId }) 
             });
-            const session = await res.json();
+            const session = await res.json(); 
             await stripe.redirectToCheckout({ sessionId: session.id });
         }
 
         function inviaMsg() {
-            const inpt = document.getElementById('input-msg');
-            const donazione = document.getElementById('input-donazione').value;
+            const inpt = document.getElementById('input-msg'); 
             if(inpt.value.trim()==="") return;
-            const tag = datiMino.isVip ? `<span class="tag-vip-oro">[VIP]</span>` : '';
-            const donTxt = donazione > 0 ? ` <span style="color:#d4af37; font-weight:bold;">[Ha donato ${donazione}€]</span>` : '';
-            document.getElementById('box-messaggi').innerHTML += `<div>${tag}<b>Tu</b>:${donTxt} ${inpt.value}</div>`;
-            inpt.value=""; document.getElementById('input-donazione').value="";
+            document.getElementById('box-messaggi').innerHTML += `<div><b>Tu</b>: ${inpt.value}</div>`; 
+            inpt.value="";
         }
     </script>
 </body>
 </html>
+
 
