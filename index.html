@@ -1,99 +1,214 @@
-<!-- Schermata del Minigioco (Inizialmente nascosta) -->
-<div id="game-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#050505; font-family:sans-serif; z-index:9998; overflow:hidden; padding:20px; box-sizing:border-box;">
-    
-    <!-- Testo Superiore Richiesto -->
-    <div style="text-align:center; margin-top:20px;">
-        <h2 style="color:#ff1e1e; font-size:24px; letter-spacing:3px; text-transform:uppercase; margin:0; font-weight:900;">Sconfiggi i mostri</h2>
-        <p id="game-subtitle" style="color:#666; font-size:12px; margin-top:5px; text-transform:uppercase; letter-spacing:1px;">Elimina le anomalie per sbloccare il menu</p>
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI ToRØ</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            font-family: sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            background: #050505;
+        }
+        .btn-option {
+            background: #111;
+            color: #fff;
+            border: 1px solid #222;
+            padding: 16px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            font-weight: bold;
+        }
+        .btn-nav {
+            background: #00d2ff;
+            color: #000;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            background: #111;
+            border: 1px solid #222;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        @keyframes heavy-shake {
+            0% { transform: translate(4px, 4px); }
+            50% { transform: translate(-4px, -4px); }
+            100% { transform: translate(4px, -4px); }
+        }
+    </style>
+    <!-- Script di Stripe necessario per caricare i moduli di pagamento -->
+    <script src="https://stripe.com"></script>
+</head>
+<body>
+
+    <!-- 1. SCHERMATA SVEGLIA CAVALIERE -->
+    <div id="screen-awake" class="screen" style="align-items: center; justify-content: center; z-index: 100;">
+        <img id="cavaliere-img" src="https://unsplash.com" style="width:260px; height:auto; opacity:0.3; border-radius:8px; transition: transform 0.2s, opacity 0.2s;" />
+        <p id="instruction" style="color:#555; font-weight:bold; margin-top:25px; font-size:13px; letter-spacing:3px; text-transform:uppercase;">Tieni premuto per svegliarlo</p>
+        <div style="width:200px; height:4px; background:#111; margin-top:15px; border-radius:2px; overflow:hidden;">
+            <div id="fire-bar" style="width:0%; height:100%; background:linear-gradient(90deg, #ff1e1e, #ff6a00);"></div>
+        </div>
     </div>
 
-    <!-- Arena di Gioco Centrale -->
-    <div id="arena" style="width:100%; height:45%; margin:40px auto 0 auto; background:#0c0c0c; border:2px solid #222; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
-        <!-- Mostro Attivo -->
-        <div id="monster-target" style="color:#ff1e1e; font-size:18px; font-weight:bold; letter-spacing:2px; border:1px solid #ff1e1e; padding:10px 20px; background:rgba(255,30,30,0.05); border-radius:4px; text-transform:uppercase; transition: all 0.2s;">
-            OMBRA: DUBBIO
+    <!-- 2. QUIZ: SCHERMATA NOME -->
+    <div id="quiz-name" class="screen" style="display:none; padding:40px 20px; justify-content: space-between;">
+        <div>
+            <h2 style="font-size:24px; margin-bottom:10px;">Come possiamo chiamarti?</h2>
+            <p style="color:#666; font-size:14px; margin-bottom:30px;">Inserisci il tuo nome per iniziare il profilo</p>
+            <input type="text" id="username-input" placeholder="Il tuo nome">
         </div>
-        <!-- Indicatore HP del Mostro -->
-        <div style="width:60%; height:4px; background:#1a1a1a; margin-top:15px; border-radius:2px; overflow:hidden;">
-            <div id="monster-hp" style="width:100%; height:100%; background:#ff1e1e; transition: width 0.2s;"></div>
+        <button class="btn-nav" onclick="nextScreen('quiz-name', 'quiz-goal')">Avanti</button>
+    </div>
+
+    <!-- 3. QUIZ: SCHERMATA OBIETTIVO -->
+    <div id="quiz-goal" class="screen" style="display:none; padding:40px 20px; justify-content: space-between; overflow-y:auto;">
+        <div>
+            <h2 style="font-size:24px; margin-bottom:30px;">Qual è il tuo obiettivo principale di allenamento?</h2>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button class="btn-option" onclick="selectGoal(this)">Perdere peso e mettermi in forma</button>
+                <button class="btn-option" onclick="selectGoal(this)">Diventare più forte</button>
+                <button class="btn-option" onclick="selectGoal(this)">Ottenere i rank della struttura fisica</button>
+                <button class="btn-option" onclick="selectGoal(this)">Sviluppare massa muscolare</button>
+                <button class="btn-option" onclick="selectGoal(this)">Diventare più costante</button>
+            </div>
+        </div>
+        <button class="btn-nav" style="margin-top:20px;" onclick="nextScreen('quiz-goal', 'quiz-data')">Avanti</button>
+    </div>
+
+    <!-- 4. QUIZ: SCHERMATA DATI GENERALI -->
+    <div id="quiz-data" class="screen" style="display:none; padding:40px 20px; justify-content: space-between; overflow-y:auto;">
+        <div>
+            <h2 style="font-size:24px; margin-bottom:25px;">Inserisci i tuoi dati di base</h2>
+            
+            <p style="color:#aaa; margin-bottom:10px; font-weight:bold;">Sesso</p>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button class="btn-option" style="text-align:center;" onclick="selectSex(this)">MASCHIO</button>
+                <button class="btn-option" style="text-align:center;" onclick="selectSex(this)">FEMMINA</button>
+            </div>
+
+            <p style="color:#aaa; margin-bottom:5px; font-weight:bold;">Altezza (cm)</p>
+            <input type="text" id="user-height" placeholder="Es. 180" style="margin-bottom:20px;">
+
+            <p style="color:#aaa; margin-bottom:5px; font-weight:bold;">Peso (kg)</p>
+            <input type="text" id="user-weight" placeholder="Es. 75" style="margin-bottom:20px;">
+
+            <p style="color:#aaa; margin-bottom:5px; font-weight:bold;">Età (Anni)</p>
+            <input type="text" id="user-age" placeholder="Es. 20">
+        </div>
+        <button class="btn-nav" style="margin-top:20px;" onclick="nextScreen('quiz-data', 'quiz-issues')">Avanti</button>
+    </div>
+
+    <!-- 5. QUIZ: SCHERMATA PUNTI SENSIBILI -->
+    <div id="quiz-issues" class="screen" style="display:none; padding:40px 20px; justify-content: space-between; overflow-y:auto;">
+        <div>
+            <h2 style="font-size:24px; margin-bottom:30px;">Hai difficoltà con uno di questi punti?</h2>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+                <button class="btn-option" onclick="selectIssue(this)">Schiena sensibile</button>
+                <button class="btn-option" onclick="selectIssue(this)">Ginocchia sensibili</button>
+                <button class="btn-option" onclick="selectIssue(this)">Spalle sensibili</button>
+                <button class="btn-option" onclick="selectIssue(this)">Polsi sensibili</button>
+                <button class="btn-option" onclick="selectIssue(this)">Nessuno di questi</button>
+            </div>
+        </div>
+        <button class="btn-nav" style="margin-top:20px;" onclick="nextScreen('quiz-issues', 'screen-game')">Avanti</button>
+    </div>
+
+    <!-- 6. MINIGIOCO: SCONFIGGI I MOSTRI -->
+    <div id="screen-game" class="screen" style="display:none; padding:20px; justify-content: space-between;">
+        <div style="text-align:center; margin-top:20px;">
+            <h2 style="color:#ff1e1e; font-size:24px; letter-spacing:3px; text-transform:uppercase; margin:0; font-weight:900;">Sconfiggi i mostri</h2>
+            <p id="game-subtitle" style="color:#666; font-size:12px; margin-top:5px; text-transform:uppercase; letter-spacing:1px;">Elimina le anomalie per sbloccare il menu</p>
+        </div>
+
+        <div id="arena" style="width:100%; height:40%; background:#0c0c0c; border:2px solid #222; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+            <div id="monster-target" style="color:#ff1e1e; font-size:18px; font-weight:bold; letter-spacing:2px; border:1px solid #ff1e1e; padding:10px 20px; background:rgba(255,30,30,0.05); border-radius:4px; text-transform:uppercase;">
+                OMBRA: DUBBIO
+            </div>
+            <div style="width:60%; height:4px; background:#1a1a1a; margin-top:15px; border-radius:2px; overflow:hidden;">
+                <div id="monster-hp" style="width:100%; height:100%; background:#ff1e1e;"></div>
+            </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+            <button onclick="handleGameAction('attacco')" style="background:#ff1e1e; color:#fff; border:none; padding:16px; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; border-radius:6px; cursor:pointer;">
+                ATTACCO ⚔️
+            </button>
+            <div style="display:flex; gap:12px;">
+                <button onclick="handleGameAction('difesa')" style="flex:1; background:#222; color:#aaa; border:1px solid #444; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer;">
+                    DIFESA 🛡️
+                </button>
+                <button onclick="handleGameAction('scatto')" style="flex:1; background:#00d2ff; color:#000; border:none; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer;">
+                    SCATTO ⚡
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Console dei Pulsanti Inferiore -->
-    <div style="position:absolute; bottom:40px; left:0; width:100%; padding:0 20px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px;">
-        
-        <!-- Tasto Attacco Principale -->
-        <button onclick="handleAction('attacco')" style="background:#ff1e1e; color:#fff; border:none; padding:16px; font-size:16px; font-weight:bold; text-transform:uppercase; letter-spacing:2px; border-radius:6px; cursor:pointer; box-shadow: 0 4px 10px rgba(255,30,30,0.3); transition: transform 0.1s;">
-            ATTACCO ⚔️
+    <!-- 7. SCHERMATA ATTIVAZIONE ABBONAMENTO STRIPE -->
+    <div id="screen-pay" class="screen" style="display:none; padding:40px 20px; align-items:center; justify-content:center;">
+        <div style="background:#0c0c0c; border:1px solid #00d2ff; padding:30px 20px; border-radius:8px; text-align:center; width:100%; max-width:400px; box-sizing:border-box; box-shadow: 0 0 20px rgba(0,210,255,0.15);">
+            <h3 style="margin:0 0 5px 0; color:#fff; text-transform:uppercase; letter-spacing:1px; font-size:18px;">Abbonamento AI ToRØ</h3>
+                    <p style="color:#00d2ff; font-size:14px; margin:0 0 20px 0; text-transform:uppercase; font-weight:bold; letter-spacing:1px;">Sblocca il tuo potenziale finale</p>
+        <p style="font-size:36px; font-weight:bold; color:#fff; margin:20px 0;">3,99 € <span style="font-size:16px; color:#aaa; font-weight:normal;">/ al mese</span></p>
+        <button onclick="avviaPagamentoStripe()" style="background:#f1c40f; color:#000; border:none; padding:16px; font-size:16px; font-weight:bold; width:100%; cursor:pointer; text-transform:uppercase; letter-spacing:1px; border-radius:6px; box-shadow: 0 4px 15px rgba(241,196,15,0.3);">
+            ATTIVA ABBONAMENTO ⚡
         </button>
-        
-        <!-- Doppi Pulsanti Laterali (Difesa e Scatto) -->
-        <div style="display:flex; gap:12px;">
-            <button onclick="handleAction('difesa')" style="flex:1; background:#222; color:#aaa; border:1px solid #444; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer;">
-                DIFESA 🛡️
-            </button>
-            <button onclick="handleAction('scatto')" style="flex:1; background:#00d2ff; color:#000; border:none; padding:14px; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:1px; border-radius:6px; cursor:pointer; box-shadow: 0 4px 10px rgba(0,210,255,0.2);">
-                SCATTO ⚡
-            </button>
-        </div>
+        <p id="error-log" style="color:#ff3e3e; font-size:12px; margin-top:20px; display:none; font-family:monospace; background:rgba(255,62,62,0.05); padding:10px; border-radius:4px; border:1px solid rgba(255,62,62,0.2);"></p>
     </div>
 </div>
 
 <script>
-let currentPhase = 'dubbio'; // Fasi: dubbio -> pigrizia -> porta
-let monsterHP = 100;
+    const SERVER_BACKEND_URL = "https://onrender.com"; 
+    const stripe = Stripe("pk_test_INCOLLA_QUI_LA_TUA_CHIAVE_PUBBLICA");
 
-function handleAction(type) {
-    const target = document.getElementById('monster-target');
-    const hpBar = document.getElementById('monster-hp');
-    const subtitle = document.getElementById('game-subtitle');
-    const arena = document.getElementById('arena');
-
-    // Effetto vibrazione visiva all'azione
-    arena.style.transform = `translate(${(Math.random()*4)-2}px, ${(Math.random()*4)-2}px)`;
-    setTimeout(() => arena.style.transform = 'none', 100);
-
-    if (currentPhase === 'dubbio' || currentPhase === 'pigrizia') {
-        if (type === 'attacco') {
-            monsterHP -= 34; // 3 colpi per uccidere il mostro
-            if (monsterHP < 0) monsterHP = 0;
-            hpBar.style.width = monsterHP + '%';
-
-            if (monsterHP <= 0) {
-                if (currentPhase === 'dubbio') {
-                    // Passa al secondo mostro
-                    currentPhase = 'pigrizia';
-                    monsterHP = 100;
-                    hpBar.style.width = '100%';
-                    target.innerHTML = "OMBRA: PIGRIZIA";
-                } else {
-                    // Entrambi i mostri sconfitti, compare la porta blindata
-                    currentPhase = 'porta';
-                    hpBar.parentElement.style.display = 'none';
-                    target.innerHTML = "PORTA BLINDATA CORE";
-                    target.style.color = "#00d2ff";
-                    target.style.borderColor = "#00d2ff";
-                    target.style.background = "rgba(0,210,255,0.05)";
-                    subtitle.innerHTML = "Usa lo scatto per distruggere la barriera";
-                }
+    async function avviaPagamentoStripe() {
+        const errLog = document.getElementById('error-log');
+        errLog.style.display = 'none';
+        try {
+            const res = await fetch(`${SERVER_BACKEND_URL}/create-checkout-session`, { 
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            if (!res.ok) throw new Error(`Risposta server KO (Status: ${res.status})`);
+            const session = await res.json();
+            if(session.id) {
+                await stripe.redirectToCheckout({ sessionId: session.id });
+            } else {
+                throw new Error("Session ID non valido dal server.");
             }
-        }
-    } else if (currentPhase === 'porta') {
-        if (type === 'scatto') {
-            // Animazione di sfondamento finale
-            arena.style.background = '#00d2ff';
-            target.innerHTML = "[PORTA DISTRUTTA]";
-            setTimeout(() => {
-                document.getElementById('game-screen').style.display = 'none';
-                // Sblocca il menu principale dell'applicazione reale
-                alert("ACCESSO AL MENU PRINCIPALE AUTORIZZATO.");
-            }, 800);
-        }
-    }
-}
+        } catch (err) {
+            errLog.innerHTML = `[CONN_ERROR] Impossibile avviare il checkout: ${err.message}`;
+            errLog.style.display = 'block';
 
-// Funzione da chiamare quando finisce il quiz per avviare il gioco
-function startMinigame() {
-    document.getElementById('game-screen').style.display = 'block';
-}
-</script>
